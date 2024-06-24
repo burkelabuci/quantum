@@ -8,7 +8,7 @@
 # then extract the 10000 data points of voltage reading from Labjack T7 in a time period of t_collect,  then plot data point index vs Labjack Voltage (units)
 #for the schemetic, refrence to page 47 of Minghao's lab Log book.
  
-
+#git test
 #import libraries
 from labjack import ljm
 import sys
