@@ -3,6 +3,7 @@
 # Author Minghao
 #This program is used to study noise
 
+#testing
 
 # This code sit the microwave frequency at sit_frequency
 # then extract the 10000 data points of voltage reading from Labjack T7 in a time period of t_collect,  then plot data point index vs Labjack Voltage (units)
