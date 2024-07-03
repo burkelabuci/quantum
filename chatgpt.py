@@ -1,3 +1,5 @@
+# this is just a temporary place to paste chatgpt code
+
 import csv
 
 # Define the filename where you want to save the CSV
