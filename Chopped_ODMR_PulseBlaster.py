@@ -1,4 +1,4 @@
-# Program name Signal Generator ODMR.py
+# Program name Chopped_ODMR_PulseBlaster.py
 # 6/17/2024
 # Author Minghao
 # From reference paper:
@@ -7,10 +7,11 @@
 # "Coherent control of NV− centers in diamond in a quantum teaching lab." American Journal of Physics 88, no. 12 (2020): 1156-1169.
 
 
-# This code sweep the microwave frequency from start_frequency to stop_frequency
+# This code use the pulse blaster instead of the signal generator to modulate the LDC 202C laser diode controller with frequency f
+# sweep the microwave frequency from start_frequency to stop_frequency
 # then extract the voltage reading from Labjack T7, , then plot frequencies (MHZ) vs Labjack Voltage (v)
 #for the schemetic, refrence to page 47 of Minghao's lab Log book.
- 
+
 
 #import libraries
 from labjack import ljm
@@ -19,59 +20,51 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from windfreak import SynthHD, synth_hd
-
+from pulsestreamer import PulseStreamer
 import time
-from datetime import datetime
-import os
 
 
-#Parameters for the microwave:
-start_frequency = 2850 #in MHz
-stop_frequency = 2900 #in MHz
-step_size = int(1) # specing between each frequency point in MHz
-step_time = int(10000) #in milliseconds
-loopAmount= 50
-base_folder = r"C:\Users\BurkeLab\Desktop\NV-center\062124" # Specify the base folder where you want to save the files
+#Parameters:
 
-#arrays that will be used for plot
-frequencies= []
+#for the microwave
+start_frequency = 2800 #in MHz 
+stop_frequency = 3000 #in MHz  
+step_size = int(1)
+step_time = int(10) #in milliseconds
+loopAmount= stop_frequency- start_frequency
 
-def generate_unique_filename(base_folder):
-    # Ensure base_folder exists, create if it doesn't
-    os.makedirs(base_folder, exist_ok=True)
-    
-    # Get current date
-    now = datetime.now()
-    month = now.strftime('%m')  # Month as 2 digits (e.g., 06)
-    day = now.strftime('%d')    # Day as 2 digits (e.g., 17)
-    year = now.strftime('%y')   # Year as 2 digits (e.g., 24)
-    
-    # Find existing files in base_folder
-    existing_files = os.listdir(base_folder)
-    
-    # Initialize file_number
-    file_number = 1
-    
-    # Iterate through existing files to find the next available file_number
-    while True:
-        filename = f"{month}{day}{year}{file_number:04d}"
-        if f"{filename}.csv" not in existing_files:
-            break
-        file_number += 1
-    
-    # Return the filepath with the next available file_number
-    filepath = os.path.join(base_folder, f"{filename}.csv")
-    return filepath
+#for the pulse streamer 8/2
+f = 1000 # in Hz
+tau = 1/f # in seconds
+tau_ns = tau*1E9 # in nanoseconds
+PB_IPADDRESS= '169.254.8.2' #ip address of the pulse streamer 8/2
+ch = 1 #channel used for pulse blaster default digital output
 
-# Generate unique filename
-plotname = generate_unique_filename(base_folder)
 
-print(f"Unique filename: {plotname}")
+#Define the name of data
+plotname= str(input("Enter the name of the data following BurkeLab Rules MMDDYYNNN(example names: 0617240001 do not use special characters or spaces)"))
 
 
 print("\n \t \t Qubit initialization Process; ODMR Single Plot \n \n")
 
 print("\t \t Initializing Systems \n \n")
+
+print("\t \t Pulse Blaster is on \n \n")
+
+
+# Create Pulse Streamer object by entering the IP address of the hardware
+ps = PulseStreamer(PB_IPADDRESS)
+
+
+# Create sequence object 
+seq = ps.createSequence()
+
+# Set channel 0 as refrence (pulse duration in nanoseconds)
+seq.setDigital(ch, [(tau_ns, 1), (tau_ns, 0)])
+
+
+#stream the sequence
+ps.stream(seq) # 10,000 reps = 2*tau_ref *10,000 seconds = 300 seconds = 5 mins
 
 #open the labjack 
 #For Labjack T7 instruction for communication with python, see https://support.labjack.com/docs/python-for-ljm-windows-mac-linux
@@ -98,7 +91,6 @@ numFrames = 2
 names = ["AIN0", "DAC0"]
 
 intervalHandle = 1
-
 
 
 #Microwave VCO initialization
@@ -158,21 +150,25 @@ while True:
 
 
 
-#save the data ie, frequency and intensity as a csv file
+
 saved_dict= {
     "frequencies": frequencies,
     "Labjack voltage": intensities
 }
 
+
 df= pd.DataFrame(saved_dict)
-csv_filepath = plotname  # using plotname as the CSV filename
-df.to_csv(csv_filepath, sep="\t")  # save CSV without index
+df.to_csv(str("C:\\Users\\BurkeLab\\Desktop\\NV-center\\10xAverageplots\\"+plotname + ".csv"), "\t")
+
+plottitle= str("C:\\Users\\BurkeLab\\Desktop\\NV-center\\10xAverageplots\\"+ plotname)
 
 
-# Plot and save figure
 plt.plot(frequencies, intensities)
 plt.xlabel("Microwave Frequency (MHz)")
-plt.ylabel("labjack voltage")
+plt.ylabel("Labjack Voltage (V)")
 
-# Display the plot
+plt.savefig(plottitle)
 plt.show()
+
+
+ps.forceFinal()
