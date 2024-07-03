@@ -1,4 +1,4 @@
-# this is just a temporary place to paste chatgpt code
+# this is just a temporary place to paste chatgpt codes
 
 import csv
 
@@ -6,7 +6,7 @@ import csv
 filename = 'pairs.csv'
 
 # Define the data pairs
-pairs = [(1, 1), (2, 4), (3, 9), (4, 16)]
+pairs = [(1, 1), (2, 4), (3, 9), (4, 16)]pyt
 
 # Define column headings
 headers = ['Number', 'Square']
