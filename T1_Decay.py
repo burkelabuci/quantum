@@ -19,14 +19,8 @@ from labjack import ljm
 from pulsestreamer import PulseStreamer
 import keyboard
 import time 
-from labjack import ljm
 import sys
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 from windfreak import SynthHD, synth_hd
-
-import time
 from datetime import datetime
 import os
 import csv
