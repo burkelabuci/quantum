@@ -27,12 +27,14 @@ from datetime import datetime
 import os
 
 from main import *
-
+from RF_frequency import *
 
 
 #Parameters for the microwave:
-start_frequency = 2800 #in MHz
-stop_frequency = 3000 #in MHz
+default_startfrequency = 2800
+default_stopfrequency = 3000
+start_frequency = default_freq(default_startfrequency,default_stopfrequency)[0]
+stop_frequency = default_freq(default_startfrequency,default_stopfrequency)[1]
 step_size = int(1) # specing between each frequency point in MHz
 step_time = int(30) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
@@ -88,7 +90,7 @@ synth = SynthHD("COM3")
 print("\t \t Set Parameters \n \n")
 
 # Define the frequency array in Hz
-frequencies = [i * 1e6 for i in range(start_frequency, stop_frequency, step_size)]
+frequencies = np.arange(start_frequency, stop_frequency, step_size) * 1e6
 
 synth.write("sweep_freq_low", start_frequency)
 

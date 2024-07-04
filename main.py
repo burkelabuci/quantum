@@ -1,6 +1,6 @@
 
 
-# main.py
+# main .py
 
 from operations import square_number
 import time
