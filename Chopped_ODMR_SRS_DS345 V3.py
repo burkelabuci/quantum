@@ -1,6 +1,6 @@
-# Program name Chopped_ODMR_SRS_DS345.py
+# Program name Chopped_ODMR_SRS_DS345 v3.py
 
-# 6/27/2024
+# 7/4/2024
 # Author Minghao
 # From reference paper:
 # Sewani, Vikas K., Hyma H. Vallabhapurapu, Yang Yang, Hannes R. Firgau, Chris Adambukulam, 
