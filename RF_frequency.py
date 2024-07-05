@@ -1,7 +1,9 @@
+#a higher level program to input start and stop rf frequency
+
 import time
 def get_user_input(prompt, default):
     user_input = input(f"{prompt} (default {default}): ")
-    return float(user_input) if user_input else default
+    return int(user_input) if user_input else default
 
 def get_confirmation(prompt):
     while True:
@@ -13,8 +15,9 @@ def get_confirmation(prompt):
 def default_freq(f1,f2):
     default_start_frequency = f1
     default_stop_frequency = f2
-    default_loop_amount = default_stop_frequency-default_start_frequency
-
+    start_frequency = 0
+    stop_frequency = 0
+    
     use_defaults = get_confirmation("Do you want to use this frequency range (default as 2800MHz to 3000MHz)?")
 
     if use_defaults:
@@ -32,5 +35,4 @@ def default_freq(f1,f2):
     time.sleep(1)
     print(f"loop amount: {stop_frequency-start_frequency} points")
     
-    return [start_frequency,stop_frequency]
-    
+    return start_frequency,stop_frequency
