@@ -1,3 +1,4 @@
+
 def get_user_input(prompt, default):
     user_input = input(f"{prompt} (default {default}): ")
     return float(user_input) if user_input else default
