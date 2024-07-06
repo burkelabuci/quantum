@@ -1,4 +1,4 @@
-# Program name Chopped_ODMR_SRS_DS345 v3.py
+# Program name Chopped_ODMR_SRS_DS345 v5.py
 
 # 7/5/2024
 # Author Minghao
@@ -10,7 +10,7 @@
 
 # This code sweep the microwave frequency from start_frequency to stop_frequency
 # then extract the voltage reading from Labjack T7, , then plot frequencies (HZ) vs Labjack Voltage (v)
-# Compared with the program named Signal Generator ODMR V2, this program will plot the frequencies in Hz instead of MHz
+
 
 #___________________________________________________________________ 
 
@@ -31,9 +31,9 @@ from Lock_in import *
 
 base_path = r"C:\Users\BurkeLab\Desktop" # Specify the path where you want to create a data folder
 
-base_folder = create_date_folder(base_path) #create a folder where you want to save your data
+base_folder = create_date_folder(base_path) #create a folder with name mm/dd/yy (eg. 070324) where you want to save your data
 
-plotname = generate_unique_filename(base_folder)# Generate unique filename
+plotname = generate_unique_filename(base_folder)# Generate unique filename with name mm/dd/yy (eg. 070324)
 
 #_____________________________________________________________________
 
@@ -47,6 +47,7 @@ loopAmount= stop_frequency-start_frequency #how many points to sweep
 step_size = int(1) # specing between each frequency point in MHz
 
 #_____________________________________________________________________________
+
 #parameters for the lock_in analyzer to adjust the step time of the microwave in milliseconds
 
 default_slope = 24 #default slope in db/Octave
@@ -55,6 +56,7 @@ rf_step_time = step_time(default_slope,default_tau_lockin) #input microwave step
 
 
 #_______________________________________________________________________________
+
 #arrays that will be used for plot
 frequencies= []
 
@@ -69,9 +71,6 @@ print("\n \t \t Qubit initialization Process; ODMR Single Plot \n \n")
 time.sleep(1) #wait for 1 second
 
 print("\t \t Initializing Systems \n \n")
-
-
-
 
 #____________________________________________________________________________
 #open the labjack 
@@ -173,6 +172,7 @@ csv_filepath = plotname  # using plotname as the CSV filename
 df.to_csv(csv_filepath, sep="\t")  # save CSV without index
 
 
+#_________________________________________________________________________
 # Plot and save figure
 plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
 plt.scatter(frequencies, intensities,color='blue', marker='o', label='Data Points')
