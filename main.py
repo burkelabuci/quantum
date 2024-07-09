@@ -6,7 +6,6 @@
 
 
 #libraries
-from operations import square_number
 import time
 from datetime import datetime
 import os
