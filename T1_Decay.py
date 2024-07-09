@@ -42,10 +42,10 @@ tau_i_ns=tau_i*1E9
 tau_delay_ns=tau_delay*1E9
 
 tau_delay_start=0.1e-3 # beginning of loop
-tau_delay_end=0.1e-3 # beginning of loop
-num_loop_points=100 # of loop points
+tau_delay_end=3e-3 # beginning of loop
+num_loop_points=10 # of loop points
 
-time_between_points=0.3 # time in seconds between each data point
+time_between_points=30 # time in seconds between each data point
 
 
 # Create Pulse Streamer object by entering the IP address of the hardware
