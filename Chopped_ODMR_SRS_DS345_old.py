@@ -1,6 +1,6 @@
-# Program name Chopped_ODMR_SRS_DS345 v5.py
+# Program name Chopped_ODMR_SRS_DS345.py
 
-# 7/5/2024
+# 6/27/2024
 # Author Minghao
 # From reference paper:
 # Sewani, Vikas K., Hyma H. Vallabhapurapu, Yang Yang, Hannes R. Firgau, Chris Adambukulam, 
@@ -10,9 +10,9 @@
 
 # This code sweep the microwave frequency from start_frequency to stop_frequency
 # then extract the voltage reading from Labjack T7, , then plot frequencies (HZ) vs Labjack Voltage (v)
+# Compared with the program named Signal Generator ODMR V2, this program will plot the frequencies in Hz instead of MHz
 
-
-#___________________________________________________________________ 
+ 
 
 #import libraries
 from labjack import ljm
@@ -21,58 +21,60 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from windfreak import SynthHD, synth_hd
+
 import time
 from datetime import datetime
 import os
-from main import *
-from RF_frequency import *
-from Lock_in import *
-#__________________________________________________________________________
 
-base_path = r"C:\Users\BurkeLab\Desktop" # Specify the path where you want to create a data folder
-
-base_folder = create_date_folder(base_path) #create a folder with name mm/dd/yy (eg. 070324) where you want to save your data
-
-plotname = generate_unique_filename(base_folder)# Generate unique filename with name mm/dd/yy (eg. 070324)
-
-#_____________________________________________________________________
 
 #Parameters for the microwave:
-#the program will ask if defult start and stop frequecies will be used
-
-default_startfrequency = 2800 
-default_stopfrequency = 3000
-start_frequency,stop_frequency = default_freq(default_startfrequency,default_stopfrequency)
-loopAmount= stop_frequency-start_frequency #how many points to sweep
+start_frequency = 2800 #in MHz
+stop_frequency = 3000 #in MHz
 step_size = int(1) # specing between each frequency point in MHz
-
-#_____________________________________________________________________________
-
-#parameters for the lock_in analyzer to adjust the step time of the microwave in milliseconds
-
-default_slope = 24 #default slope in db/Octave
-default_tau_lockin = 30 #defult lock_in time constant in milliseconds_
-rf_step_time = step_time(default_slope,default_tau_lockin) #input microwave step time in milliseconds
-
-
-#_______________________________________________________________________________
+step_time = int(30) #in milliseconds
+loopAmount= stop_frequency-start_frequency #how many points to sweep
+base_folder = r"C:\Users\BurkeLab\Desktop\070824" # Specify the base folder where you want to save the files
 
 #arrays that will be used for plot
 frequencies= []
 
-time.sleep(1) #wait for 1 second
+def generate_unique_filename(base_folder):
+    # Ensure base_folder exists, create if it doesn't
+    os.makedirs(base_folder, exist_ok=True)
+    
+    # Get current date
+    now = datetime.now()
+    month = now.strftime('%m')  # Month as 2 digits (e.g., 06)
+    day = now.strftime('%d')    # Day as 2 digits (e.g., 17)
+    year = now.strftime('%y')   # Year as 2 digits (e.g., 24)
+    
+    # Find existing files in base_folder
+    existing_files = os.listdir(base_folder)
+    
+    # Initialize file_number
+    file_number = 1
+    
+    # Iterate through existing files to find the next available file_number
+    while True:
+        filename = f"{month}{day}{year}{file_number:04d}"
+        if f"{filename}.csv" not in existing_files:
+            break
+        file_number += 1
+    
+    # Return the filepath with the next available file_number
+    filepath = os.path.join(base_folder, f"{filename}.csv")
+    return filepath
 
-print(f"Data file successully created: {plotname}")
+# Generate unique filename
+plotname = generate_unique_filename(base_folder)
 
-time.sleep(1) #wait for 1 second
+print(f"Unique filename: {plotname}")
+
 
 print("\n \t \t Qubit initialization Process; ODMR Single Plot \n \n")
 
-time.sleep(1) #wait for 1 second
-
 print("\t \t Initializing Systems \n \n")
 
-#____________________________________________________________________________
 #open the labjack 
 #For Labjack T7 instruction for communication with python, see https://support.labjack.com/docs/python-for-ljm-windows-mac-linux
 handle = ljm.openS("ANY", "ANY")
@@ -99,8 +101,6 @@ names = ["AIN0", "DAC0"]
 
 intervalHandle = 1
 
-#______________________________________________________________________
-
 
 
 #Microwave VCO initialization
@@ -108,7 +108,7 @@ synth = SynthHD("COM3")
 print("\t \t Set Parameters \n \n")
 
 # Define the frequency array in Hz
-frequencies = np.arange(start_frequency, stop_frequency, step_size) * 1e6
+frequencies = [i * 1e6 for i in range(start_frequency, stop_frequency, step_size)]
 
 synth.write("sweep_freq_low", start_frequency)
 
@@ -121,10 +121,13 @@ print("Frequency high set")
 synth.write("sweep_freq_step",step_size)
 print("Frequency step set")
 
-synth.write("sweep_time_step", rf_step_time)
+synth.write("sweep_time_step", step_time)
 print("Frequency time set")
 
 print("Starting collecting")
+
+revised_steptime= step_time*1000
+ljm.startInterval(intervalHandle, revised_steptime)
 
 
 #define intensity array
@@ -136,13 +139,7 @@ intensities= []
 synth.write("sweep_single",True)
 print("Actual sweep once true")
 
-
-#_____________________________________________________________________________________________
-
-
 #loop over and read the signal from the Labjack T7 and append the value to the intensity array
-revised_steptime= rf_step_time*1000
-ljm.startInterval(intervalHandle, revised_steptime)
 j=0
 while True:
     try:
@@ -160,7 +157,7 @@ while True:
         break
 
 
-#______________________________________________________________________
+
 #save the data ie, frequency and intensity as a csv file
 saved_dict= {
     "frequencies (Hz)": frequencies,
@@ -172,18 +169,10 @@ csv_filepath = plotname  # using plotname as the CSV filename
 df.to_csv(csv_filepath, sep="\t")  # save CSV without index
 
 
-#_________________________________________________________________________
 # Plot and save figure
-plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
-plt.scatter(frequencies, intensities,color='blue', marker='o', label='Data Points')
-plt.title('Labjack Reading  vs RF Frequency')
+plt.plot(frequencies, intensities)
 plt.xlabel("Microwave Frequency (Hz)")
 plt.ylabel("labjack voltage (V)")
-
-# Display the plot
-plt.grid(True)
-plt.legend()
-plt.tight_layout()
 
 # Display the plot
 plt.show()

@@ -1,6 +1,6 @@
-# Program name Chopped_ODMR_SRS_DS345 v3.py
+# Program name Chopped_ODMR_SRS_DS345 v5.py
 
-# 7/4/2024
+# 7/8/2024
 # Author Minghao
 # From reference paper:
 # Sewani, Vikas K., Hyma H. Vallabhapurapu, Yang Yang, Hannes R. Firgau, Chris Adambukulam, 
@@ -10,9 +10,12 @@
 
 # This code sweep the microwave frequency from start_frequency to stop_frequency
 # then extract the voltage reading from Labjack T7, , then plot frequencies (HZ) vs Labjack Voltage (v)
-# Compared with the program named Signal Generator ODMR V2, this program will plot the frequencies in Hz instead of MHz
+#This new program implement the higher level programs in main.py. Basically, it inputs start/stop frequencies of the microwave, time constant of the lock-in analyzer,
+#and converts into proper step time in ms of the microwave.  In addition, the  microwave is programmed to warm up for 10 seconds before sweeping frequencies,
+# and to return to start frequency after making the plot.
 
- 
+
+#___________________________________________________________________ 
 
 #import libraries
 from labjack import ljm
@@ -21,42 +24,57 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from windfreak import SynthHD, synth_hd
-
 import time
 from datetime import datetime
 import os
-
 from main import *
-from RF_frequency import *
 
+#__________________________________________________________________________
 
-#Parameters for the microwave:
-default_startfrequency = 2800
-default_stopfrequency = 3000
-start_frequency = default_freq(default_startfrequency,default_stopfrequency)[0]
-stop_frequency = default_freq(default_startfrequency,default_stopfrequency)[1]
-step_size = int(1) # specing between each frequency point in MHz
-step_time = int(30) #in milliseconds
-loopAmount= stop_frequency-start_frequency #how many points to sweep
 base_path = r"C:\Users\BurkeLab\Desktop" # Specify the path where you want to create a data folder
 
-base_folder = create_date_folder(base_path) #create a folder where you want to save your data
+base_folder = create_date_folder(base_path) #create a folder with name mm/dd/yy (eg. 070324) where you want to save your data
+
+plotname = generate_unique_filename(base_folder)# Generate unique filename with name mm/dd/yy (eg. 070324)
+
+#_____________________________________________________________________
+
+#Parameters for the microwave:
+#the program will ask if defult start and stop frequecies will be used
+
+default_startfrequency = 2800 
+default_stopfrequency = 3000
+start_frequency,stop_frequency = default_freq(default_startfrequency,default_stopfrequency)
+loopAmount= stop_frequency-start_frequency #how many points to sweep
+step_size = int(1) # specing between each frequency point in MHz
+
+#_____________________________________________________________________________
+
+#parameters for the lock_in analyzer to adjust the step time of the microwave in milliseconds
+
+default_slope = 24 #default slope in db/Octave
+default_tau_lockin = 30 #defult lock_in time constant in milliseconds_
+rf_step_time = step_time(default_slope,default_tau_lockin) #input microwave step time in milliseconds
 
 
-# Generate unique filename
-plotname = generate_unique_filename(base_folder)
+#_______________________________________________________________________________
 
 #arrays that will be used for plot
 frequencies= []
 
-print(f"Unique filename: {plotname}")
+time.sleep(1) #wait for 1 second
+
+print(f"Data file successully created: {plotname}")
 
 time.sleep(1) #wait for 1 second
 
 print("\n \t \t Qubit initialization Process; ODMR Single Plot \n \n")
 
+time.sleep(1) #wait for 1 second
+
 print("\t \t Initializing Systems \n \n")
 
+#____________________________________________________________________________
 #open the labjack 
 #For Labjack T7 instruction for communication with python, see https://support.labjack.com/docs/python-for-ljm-windows-mac-linux
 handle = ljm.openS("ANY", "ANY")
@@ -83,6 +101,8 @@ names = ["AIN0", "DAC0"]
 
 intervalHandle = 1
 
+#______________________________________________________________________
+
 
 
 #Microwave VCO initialization
@@ -103,13 +123,14 @@ print("Frequency high set")
 synth.write("sweep_freq_step",step_size)
 print("Frequency step set")
 
-synth.write("sweep_time_step", step_time)
+synth.write("sweep_time_step", rf_step_time)
 print("Frequency time set")
 
-print("Starting collecting")
+# Warm up the microwave for 30 seconds
+print("Warming up the microwave for 10 seconds...")
+time.sleep(10)
 
-revised_steptime= step_time*1000
-ljm.startInterval(intervalHandle, revised_steptime)
+print("Warm-up complete. Starting sweep...")
 
 
 #define intensity array
@@ -121,7 +142,13 @@ intensities= []
 synth.write("sweep_single",True)
 print("Actual sweep once true")
 
+
+#_____________________________________________________________________________________________
+
+
 #loop over and read the signal from the Labjack T7 and append the value to the intensity array
+revised_steptime= rf_step_time*1000
+ljm.startInterval(intervalHandle, revised_steptime)
 j=0
 while True:
     try:
@@ -139,7 +166,7 @@ while True:
         break
 
 
-
+#______________________________________________________________________
 #save the data ie, frequency and intensity as a csv file
 saved_dict= {
     "frequencies (Hz)": frequencies,
@@ -151,9 +178,10 @@ csv_filepath = plotname  # using plotname as the CSV filename
 df.to_csv(csv_filepath, sep="\t")  # save CSV without index
 
 
+#_________________________________________________________________________
 # Plot and save figure
 plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
-plt.scatter(frequencies, intensities,color='blue', marker='o', label='Data Points')
+plt.scatter(frequencies, intensities,color='blue', marker='o', label='ODMR Data Points')
 plt.title('Labjack Reading  vs RF Frequency')
 plt.xlabel("Microwave Frequency (Hz)")
 plt.ylabel("labjack voltage (V)")
@@ -165,3 +193,8 @@ plt.tight_layout()
 
 # Display the plot
 plt.show()
+
+# Return the microwave to the start frequency
+print("Returning microwave to the start frequency...")
+synth.write("frequency",start_frequency)
+print("Microwave frequency reset complete.")

@@ -1,12 +1,32 @@
 
 
 # main .py
+#these are the higher level programs to be used for NV- center ODMR experiment
 
+
+
+#libraries
 from operations import square_number
 import time
 from datetime import datetime
 import os
+#____________________________________________________________________________
 
+#prorgams to ask for inputs
+def get_user_input(prompt, default):
+    user_input = input(f"{prompt} (default {default}): ")
+    return int(user_input) if user_input else default
+
+def get_confirmation(prompt):
+    while True:
+        confirmation = input(f"{prompt} (yes/no): ").strip().lower()
+        if confirmation in ['yes', 'no']:
+            return confirmation == 'yes'
+        print("Please answer with 'yes' or 'no'.")
+#_______________________________________________________________________
+
+
+#programs to create a folder and generate the name of the file following Burke lab rule
 def create_date_folder(base_path):
     # Get today's date in the desired format
     today_date = datetime.now().strftime("%m%d%y")
@@ -51,32 +71,60 @@ def generate_unique_filename(base_folder):
     filepath = os.path.join(base_folder, f"{filename}.csv")
     
     return filepath
+#______________________________________________________________________________________
 
-def main():
-    # Prompt the user to enter a number with a default value of 3
-    input_value = input("Please enter a number (default is 3): ")
+#program to confirm the start and stop microwave frequencies
+def default_freq(f1,f2):
+    default_start_frequency = f1
+    default_stop_frequency = f2
+    start_frequency = 0
+    stop_frequency = 0
     
-    # Use the default value if the user does not enter anything
-    if not input_value:
-        number = 3
+    use_defaults = get_confirmation("Do you want to use this frequency range (default as 2800MHz to 3000MHz)?")
+
+    if use_defaults:
+        start_frequency = default_start_frequency
+        stop_frequency = default_stop_frequency
     else:
-        try:
-            number = float(input_value)
-        except ValueError:
-            print("Invalid input. Please enter a numeric value.")
-            return
-    
-    # Confirm the entered value
-    confirm = input(f"You entered {number}. Is this correct? (yes/no): ").strip().lower()
-    if confirm != 'yes':
-        print("Input not confirmed. Exiting program.")
-        return
-    
-    # Call the function from module.py
-    result = square_number(number)
-    
-    # Print the result
-    print(f"The square of {number} is {result}")
+        # Get user inputs
+        start_frequency = get_user_input("Enter the new start frequency in MHz", default_start_frequency)
+        stop_frequency = get_user_input("Enter the new stop frequency in MHz", default_stop_frequency)
 
-if __name__ == "__main__":
-    main()
+
+    print("\nSummary of your input:")
+    time.sleep(1)
+    print(f"start frequency: {start_frequency} MHz, stop frequency: {stop_frequency} MHz")
+    time.sleep(1)
+    print(f"loop amount: {stop_frequency-start_frequency} points")
+    
+    return start_frequency,stop_frequency
+#_______________________________________________________________________
+
+#program to confirm the time constant and slope of the lock-in analyzer and automatically convert to proper step time in ms of the microwave
+def step_time(slope_per_octave,tau_lockin):
+    default_slope = slope_per_octave
+    default_tau_lockin = tau_lockin
+    step_time = 0
+    use_defaults = get_confirmation("Do you want to use the default slope/octave (24dB) and time average (30ms) for the lock-in analyzer?")
+    if use_defaults:
+        slope_set = default_slope
+        tau_avg = default_tau_lockin
+        step_time = 10*tau_avg
+    else:
+        slope_set = get_user_input("Enter the new slope/octave (dB)", default_slope)
+        tau_avg = get_user_input("Enter the new time constant in milliseconds", default_tau_lockin)
+        if slope_set == 6:
+            step_time = 5*tau_avg
+        elif slope_set == 12:
+            step_time = 7*tau_avg
+        elif slope_set == 18:
+            step_time = 9*tau_avg
+        elif slope_set == 24:
+            step_time = 10*tau_avg
+        else:
+            raise ValueError("Unsupported slope per octave value. Supported values are 6, 12, 18 and 24.")
+    
+    time.sleep(1)
+
+    print(f"your step time is: {step_time} ms")   
+    return step_time
