@@ -17,15 +17,15 @@ import time
 
 #***************************************************************************************
 #Parameters:
-t_wait =0.1 # wait time between points in seconds
-num_readings=10 # total # of readings
+t_wait =1 # wait time between points in seconds
+num_readings=100 # total # of readings
 
 t_each= 100 #milliseconds Minghao what is this ??????
 
 #***************************************************************************************
 # Create filename
 #Define the name of data
-plotname= str(input("Enter the name of the data following BurkeLab Rules MMDDYYNNN(example names: 0617240001 do not use special characters or spaces)"))
+#plotname= str(input("Enter the name of the data following BurkeLab Rules MMDDYYNNN(example names: 0617240001 do not use special characters or spaces)"))
 
 
 
@@ -77,23 +77,50 @@ for i in range(num_readings):
 
     # read labjack:
     reading_value = abs(ljm.eReadNames(handle, numFrames, names)[0])
+    print(i,reading_value)
     ljm.waitForNextInterval(intervalHandle)
     
-    readings.append([i + 1, reading_value])  # Store reading number and callme return value
+    readings.append(reading_value)  # Store reading number and callme return value
     time.sleep(t_wait)
 
-# Print the readings
-for reading in readings:
-    print(f"Reading {reading[0]}: {reading[1]}")
 
 # Optional: Convert the readings list to a numpy array for further processing
 import numpy as np
 readings_array = np.array(readings)
-print(readings_array)
+
+
+# Print the readings array
+print("Readings Array:", readings_array)
+
+# Calculate the average (mean) of the readings
+average_reading = np.mean(readings_array)
+print("Average Reading:", average_reading)
+
+# Calculate the standard deviation of the readings
+std_deviation = np.std(readings_array)
+print("Standard Deviation:", std_deviation)
 
 
 #***************************************************************************************
+# plot readings:
 
+# Plot the readings
+plt.figure(figsize=(10, 6))
+plt.plot(readings_array, marker='o', linestyle='-', color='b', label='Readings')
+plt.axhline(y=average_reading, color='r', linestyle='--', label=f'Average: {average_reading:.2f}')
+plt.fill_between(range(len(readings_array)), 
+                 average_reading - std_deviation, 
+                 average_reading + std_deviation, 
+                 color='gray', alpha=0.2, label=f'Std Dev: {std_deviation:.2f}')
+
+# Add labels and title
+plt.xlabel('Index')
+plt.ylabel('Reading Value')
+plt.title('Readings Plot with Average and Standard Deviation')
+plt.legend()
+
+# Show the plot
+plt.show()
 
 
 #***************************************************************************************
