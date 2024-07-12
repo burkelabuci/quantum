@@ -18,7 +18,7 @@ import time
 #***************************************************************************************
 #Parameters:
 t_wait =1 # wait time between points in seconds
-num_readings=100 # total # of readings
+num_readings=2 # total # of readings
 
 t_each= 100 #milliseconds Minghao what is this ??????
 

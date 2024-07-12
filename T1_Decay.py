@@ -42,10 +42,10 @@ tau_i_ns=tau_i*1E9
 tau_delay_ns=tau_delay*1E9
 
 tau_delay_start=0.1e-3 # beginning of loop
-tau_delay_end=0.1e-3 # beginning of loop
-num_loop_points=2 # of loop points
+tau_delay_end=3e-3 # beginning of loop
+num_loop_points=100 # of loop points
 
-time_between_points=1 # time in seconds between each data point
+time_between_points=10 # time in seconds between each data point
 
 
 # Create Pulse Streamer object by entering the IP address of the hardware
@@ -109,13 +109,14 @@ columns = ['tau delay', 'labjack reading']
 # Loop through the calculated tau_delays
 for tau in tau_delays:
     # Your code here
-    print("calling create_fig3_teachingpaper_pulse_sequence with tau= ",tau)
+    #print("calling create_fig3_teachingpaper_pulse_sequence with tau= ",tau)
     create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau/1e-9,ps)
     time.sleep(time_between_points)  # Delay for time_between_points seconds
     # read and print labjack voltage:
     try:
         results = ljm.eReadNames(handle, numFrames, names)
-        print("results[0]=",abs(results[0]))
+        #print("results[0]=",abs(results[0]))
+        print(tau,abs(results[0]))
     except KeyboardInterrupt:
         break
     except Exception:
