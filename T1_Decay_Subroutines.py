@@ -44,6 +44,7 @@ def create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps
     # Create sequence object 
     seq = ps.createSequence()
 
+
     # Set channel 0 as refrence (pulse duration in nanoseconds)
     seq.setDigital(0, [(tau_ref_ns, 1), (tau_ref_ns, 0)])
 
