@@ -1,0 +1,186 @@
+# Program name T1_Decay.py
+# 6/14/2024
+# Author Minghao
+# From reference paper:
+# Sewani, Vikas K., Hyma H. Vallabhapurapu, Yang Yang, Hannes R. Firgau, Chris Adambukulam, 
+# Brett C. Johnson, Jarryd J. Pla, and Arne Laucht. 
+# "Coherent control of NV− centers in diamond in a quantum teaching lab." American Journal of Physics 88, no. 12 (2020): 1156-1169.
+# 6/14/2024 Peter debugging Minghao's bug
+# Deletes Initialization pulses for demo purposes
+
+# This program creates Ch0 and Ch1 output waveform of Pulseblaster model 8/2 as Fig 3 of reference
+# at IP address PB_IPADDRESS
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from labjack import ljm
+from pulsestreamer import *
+import keyboard
+import time 
+import sys
+from windfreak import SynthHD, synth_hd
+from datetime import datetime
+import os
+import csv
+from T1_Decay_Subroutines import *
+
+
+#--------------------- PARAMETERS-------------------------
+tau_ref_ns=15e-3*1e9
+tau_i_ns=1e-6*1e9 # laser initialization/readout pulse width
+number_of_cycles=33
+channel_number_ref=0
+channel_number_pulse=1
+delay_start_s=0.1e-3
+delay_stop_s=3e-3
+delay_number_of_points=10
+step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
+step_time_microseconds=step_time*1e6
+
+#--------------------- INITIALIZE PULSEBLASTER-------------------------
+PB_IPADDRESS= '169.254.8.2'
+
+ps = PulseStreamer(PB_IPADDRESS)
+
+
+ps.setTrigger(TriggerStart.SOFTWARE)
+
+
+#--------------------- INITIALIZE LABJACK-------------------------
+
+#For Labjack T7 instruction for communication with python, see https://support.labjack.com/docs/python-for-ljm-windows-mac-linux
+handle = ljm.openS("ANY", "ANY")
+
+#AIN#_NEGATIVE_CH: Specifies the negative channel to be used for each positive channel. 199=Default=> Single-Ended.
+#AIN#_RANGE: The range/span of each analog input. Write the highest expected input voltage. For T7, the default is -10V to 10V
+#AIN#_RESOLUTION_INDEX: The resolution index for command-response and AIN-EF readings. A larger resolution index generally results in lower noise and longer sample times.
+#Default value of 0 corresponds to an index of 8 (T7) 
+#AIN#_SETTLING_US: Settling time for command-response and AIN-EF readings. For T-7: Auto. Max is 50000 (microseconds).
+
+names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US",
+             "AIN1_NEGATIVE_CH", "AIN1_RANGE", "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
+
+#Default values
+aValues = [199, 10.0, 0, 0, 199, 10.0, 0, 0]
+num_Frames= len(names)
+
+ljm.eWriteNames(handle, num_Frames, names, aValues)
+
+numFrames = 2
+names = ["AIN0", "DAC0"]
+
+intervalHandle = 1
+
+
+ljm.startInterval(intervalHandle, int(step_time_microseconds))
+
+
+#--------------------- DOWNLOADED PULSES STREAM TO PULSESTREAMER-------------------------
+
+
+do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+
+
+
+#--------------LOOP SETUP----------------------------
+
+
+
+# Initialize the data array
+# Initialize an empty list to store the pairs (i, i^2)
+pairs = []
+
+# Specify the filename for the CSV file
+filename = 'pairs.csv'
+
+# Define column names
+columns = ['tau delay', 'labjack reading']
+
+# parameters for loop:
+loopAmount=delay_number_of_points
+
+# copy of time delay array
+# Generate non-integer delays
+delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+#print(delays)
+
+#loop over and read the signal from the Labjack T7 and append the value to the intensity array
+
+
+
+#--------------LOOP START----------------------------
+
+# COUNTDOWN
+for i in range(1, 11):
+    print(i)
+    time.sleep(1)
+
+print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+ps.startNow()
+
+for tau in delays:
+    try:
+        results = ljm.eReadNames(handle, numFrames, names)
+        print(tau,abs(results[0]))
+        pairs.append((tau,abs(results[0])))  # Append the tuple to the list
+        ljm.waitForNextInterval(intervalHandle)
+    except KeyboardInterrupt:
+        break
+    except Exception:
+        print(sys.exc_info()[1])
+        break
+
+    
+    
+
+#--------------------- DISPLAY DATA AND SAVE TO FILE-------------------------
+
+print(pairs)  # Print the list of tuples
+
+
+# Open the file in 'w' mode with newline='' to prevent extra newline characters
+with open(filename, 'w', newline='') as csvfile:
+    # Create a CSV writer object
+    csvwriter = csv.writer(csvfile)   
+# Write each pair (i, i^2) as a row in the CSV file
+    for pair in pairs:
+        csvwriter.writerow(pair)
+
+# Create a DataFrame
+df = pd.DataFrame(pairs, columns=columns)
+
+
+# Save DataFrame to CSV
+df.to_csv(filename, index=False)
+print(f'Pairs saved to {filename}')
+
+# Plotting
+plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
+plt.scatter(df['tau delay'], df['labjack reading'], color='blue', marker='o', label='Data Points')
+plt.title('Labjack Reading  vs Tau Delay')
+plt.xlabel('Tau Delay')
+plt.ylabel('Labjack Reading')
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+
+# Display the plot
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
