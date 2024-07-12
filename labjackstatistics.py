@@ -13,7 +13,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from windfreak import SynthHD, synth_hd
 import time
-
+import csv
+import csv
+import pandas as pd
 
 #***************************************************************************************
 #Parameters:
@@ -125,5 +127,32 @@ plt.show()
 
 #***************************************************************************************
 # Save to file
+# Specify the filename for the CSV file
+filename = 'pairs.csv'
+columns = ['point_number', 'labjack reading']
+# Open the file in 'w' mode with newline='' to prevent extra newline characters
+with open(filename, 'w', newline='') as csvfile:
+    # Create a CSV writer object
+    csvwriter = csv.writer(csvfile)
+        
+    # Write header row
+    csvwriter.writerow(columns)   
+        
+    # Write each value in readings as a row in the CSV file with an index
+    for i, value in enumerate(readings):
+        csvwriter.writerow([i+1, value])  # index starts from 1
+
+# Create a DataFrame with 'point_number' as index and 'labjack reading' as column
+df = pd.DataFrame({'labjack reading': readings}, index=pd.RangeIndex(start=1, stop=len(readings)+1, name='point_number'))
+
+# Save DataFrame to CSV (excluding index)
+df.to_csv(filename, index=False)
+
+print(f'Pairs saved to {filename}')
+
+#********************CHATGPTSAVETOFILE**********************
+
+
+
 
 

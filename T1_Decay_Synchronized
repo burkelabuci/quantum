@@ -30,12 +30,12 @@ from T1_Decay_Subroutines import *
 #--------------------- PARAMETERS-------------------------
 tau_ref_ns=15e-3*1e9
 tau_i_ns=1e-6*1e9 # laser initialization/readout pulse width
-number_of_cycles=33
+number_of_cycles=330
 channel_number_ref=0
 channel_number_pulse=1
 delay_start_s=0.1e-3
 delay_stop_s=3e-3
-delay_number_of_points=10
+delay_number_of_points=100
 step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
 step_time_microseconds=step_time*1e6
 

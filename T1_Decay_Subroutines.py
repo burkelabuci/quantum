@@ -195,7 +195,7 @@ def do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number
 
     # Add all the sequences together
     result_sequence = sum(sequences[1:], sequences[0])
-    ps.stream(result_sequence,1)  # runs forever , but returns program
+    ps.stream(result_sequence)  # runs forever , but returns program
 
 def generate_alternating_pairs(x_value, num_pairs):
     # Peter Burke 7/12/2024
