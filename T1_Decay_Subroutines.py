@@ -216,7 +216,8 @@ def generate_alternating_pairs(x_value, num_pairs):
     Returns:
         list of tuples: The generated (x, y) pairs.
     """
-    return [(x_value, i % 2) for i in range(num_pairs)]
+    #return [(x_value, i % 2) for i in range(num_pairs)]
+    return [(x_value,1- i % 2) for i in range(num_pairs)]
 
 
 def create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
