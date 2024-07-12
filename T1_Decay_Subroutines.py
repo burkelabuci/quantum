@@ -180,7 +180,22 @@ def create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
 
     return seq
 
+def do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps):
 
+
+    # Generate non-integer delays
+    delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+    print(delays)
+
+    # Create sequences using the non-integer delays
+    sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
+
+    # old one has integer value of delays
+    #sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,delay*1e-3*1e9,number_of_cycles,ps) for delay in range(1, 11)]
+
+    # Add all the sequences together
+    result_sequence = sum(sequences[1:], sequences[0])
+    ps.stream(result_sequence,1)  # runs forever , but returns program
 
 def generate_alternating_pairs(x_value, num_pairs):
     # Peter Burke 7/12/2024
