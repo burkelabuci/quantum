@@ -26,41 +26,16 @@ tau_ref_ns=15e-3*1e9
 tau_i_ns=0.1e-3*1e9
 tau_delay_ns=2e-3*1e9
 number_of_cycles=33
-square_wave_half_cycle_s=15e-3
-
-#seqdelay=createt1decaysequence(1,  tau_ref_ns,tau_i_ns,tau_delay_ns ,number_of_cycles,ps)
-
-#seqref=createsquarewavesequence(0,square_wave_half_cycle_s,number_of_cycles,ps)
-
 channel_number_ref=0
 channel_number_pulse=1
-#seqtotal=create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_delay_ns,number_of_cycles,ps)
-
-
-# Create an array of sequence objects
-#sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,delay*1e-3*1e9,number_of_cycles,ps) for delay in range(1, 11)]
-delay_start_s=1e-3
+delay_start_s=0.1e-3
 delay_stop_s=3e-3
 delay_number_of_points=10
 
 
-# Generate non-integer delays
-#delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
-
-# Create sequences using the non-integer delays
-#sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
-
-# old one has integer value of delays
-#sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,delay*1e-3*1e9,number_of_cycles,ps) for delay in range(1, 11)]
-
-# Add all the sequences together
-#result_sequence = sum(sequences[1:], sequences[0])
-#ps.stream(result_sequence,1)  # runs forever , but returns program
-
 
 do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
-#ps.stream(sequences[2])  # runs forever , but returns program
 
 
 
