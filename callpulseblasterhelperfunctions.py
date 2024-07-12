@@ -29,13 +29,14 @@ ps.setTrigger(TriggerStart.SOFTWARE)
 #seq = ps.createSequence()
 #seqdelay=createsquarewavesequence(0,15e-3,6,ps)
 tau_ref_ns=15e-3*1e9
-tau_i_ns=1e-6*1e9 # laser initialization/readout pulse width
-number_of_cycles=33
+tau_i_ns=5e-6*1e9 # laser initialization/readout pulse width
+#number_of_cycles=33
+number_of_cycles=12
 channel_number_ref=0
 channel_number_pulse=1
-delay_start_s=0.1e-3
-delay_stop_s=3e-3
-delay_number_of_points=1000
+delay_start_s=1e-6
+delay_stop_s=100e-6
+delay_number_of_points=100
 
 
 
@@ -43,13 +44,13 @@ delay_number_of_points=1000
 
 
 
-tau_delay_ns=1e-3*1e9
+tau_delay_ns=10e-6*1e9
 create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps)
 
 
-for i in range(1, 11):
-    print(i)
-    time.sleep(1)
+#for i in range(1, 11):
+#    print(i)
+#    time.sleep(1)
 
 print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 ps.startNow()

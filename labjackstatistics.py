@@ -19,8 +19,8 @@ import pandas as pd
 
 #***************************************************************************************
 #Parameters:
-t_wait =1 # wait time between points in seconds
-num_readings=2 # total # of readings
+t_wait =10 # wait time between points in seconds
+num_readings=100 # total # of readings
 
 t_each= 100 #milliseconds Minghao what is this ??????
 
