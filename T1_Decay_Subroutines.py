@@ -64,3 +64,155 @@ def create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps
 
 
 
+def createsquarewavesequence(channel_number,square_wave_half_cycle_s,number_of_cycles,ps: PulseStreamer):
+    # create a sequence that is a square wave
+    # input is square wave half cycle in seconds
+    # input is number of cycles in the sequence
+    # channel_number is the channel number (default 0)
+    # return is a sequence in pulseblaster format
+    # reference : https://www.swabianinstruments.com/static/documentation/PulseStreamer/sections/api-doc.html
+
+    #print("****************************************************************")
+
+    #square_wave_half_cycle_s=15e-3 # temporarily hard code
+    #number_of_cycles=100# temporarily hard code
+    square_wave_half_cycle_ns=square_wave_half_cycle_s*1e9 # convert to ns
+
+    # Create sequence object 
+    seq = ps.createSequence()
+
+    # pulse_patt = [(100, 0), (200, 1), (80, 0), (300, 1), (60, 0)]
+
+    pulse_patt = generate_alternating_pairs(square_wave_half_cycle_ns,2*number_of_cycles)
+    print(pulse_patt)
+    seq.setDigital(channel_number, pulse_patt)
+
+    
+    return seq
+
+
+
+
+ 
+
+    #print("Done inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("****************************************************************")
+
+
+
+    return
+
+
+
+
+def createt1decaysequence(channel_number,  tau_ref_ns,tau_i_ns,tau_delay_ns ,number_of_cycles,ps: PulseStreamer):
+
+    # Creates patter in fig 3 of teaching paper
+    # ps is the pulsestreamer object
+    # duration is how long the stream runs for in seconds
+    # return is a sequence in pulseblaster format
+    # reference : https://www.swabianinstruments.com/static/documentation/PulseStreamer/sections/api-doc.html
+
+
+
+    # Create sequence object 
+    seq = ps.createSequence()
+
+    # pulse_patt = [(100, 0), (200, 1), (80, 0), (300, 1), (60, 0)]
+
+
+    pulse_patt = create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    
+    print(pulse_patt)
+    seq.setDigital(channel_number, pulse_patt)
+
+    return seq
+
+
+
+
+ 
+
+    #print("Done inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("****************************************************************")
+
+
+
+    return
+
+
+
+
+def create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_delay_ns,number_of_cycles,ps: PulseStreamer):
+    # Creates patter in fig 3 of teaching paper
+    # ps is the pulsestreamer object
+    # duration is how long the stream runs for in seconds
+
+    #print("****************************************************************")
+    #print("Start inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("tau_ref_ns,tau_i_ns,tau_delay_ns=")
+    #print(tau_ref_ns,tau_i_ns,tau_delay_ns)
+    
+    
+
+    # Create sequence object 
+    seq = ps.createSequence()
+    
+    #************* SQUAREWAVE FIRST*******************
+    
+    square_wave_half_cycle_ns=tau_ref_ns
+
+    # pulse_patt = [(100, 0), (200, 1), (80, 0), (300, 1), (60, 0)]
+
+    pulse_patt_ref = generate_alternating_pairs(square_wave_half_cycle_ns,2*number_of_cycles)
+    print(pulse_patt_ref)
+    seq.setDigital(channel_number_ref, pulse_patt_ref)
+
+
+    
+    #*********** THEN PULSE CYCLE
+    
+
+    pulse_patt_decay = create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    
+    print(pulse_patt_decay)
+    seq.setDigital(channel_number_pulse, pulse_patt_decay)
+
+    return seq
+
+
+
+def generate_alternating_pairs(x_value, num_pairs):
+    # Peter Burke 7/12/2024
+    # Chatgpt to created alternating pairs
+    # Example of calling the function
+    #x_value = 5
+    #num_pairs = 10
+    #pairs = generate_alternating_pairs(x_value, num_pairs)
+    #print(pairs)
+
+    """
+    Generates a list of (x, y) pairs where y alternates between 0 and 1.
+    
+    Parameters:
+        x_value (int or float): The constant x value for each pair.
+        num_pairs (int): The number of pairs to generate.
+    
+    Returns:
+        list of tuples: The generated (x, y) pairs.
+    """
+    return [(x_value, i % 2) for i in range(num_pairs)]
+
+
+def create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
+    pattern = [
+        (tau_i_ns, 1), 
+        ((tau_ref_ns - tau_i_ns), 0), 
+        (tau_i_ns, 1), 
+        (tau_delay_ns, 0), 
+        (tau_i_ns, 1), 
+        ((tau_ref_ns - 2 * tau_i_ns - tau_delay_ns), 0)
+    ]
+    
+    pattern_array = pattern * n
+    return pattern_array
