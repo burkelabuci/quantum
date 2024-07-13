@@ -57,6 +57,71 @@ def T1_Decay_parameters(t_ref,t_i,t_delay_start,t_delay_end,step_time,num_points
 
 
 
+def num_of_cycle(n):
+    default_cycle = n
+    cycle = 0
+    use_defaults = get_confirmation("Do you want to use this number of cycles (default as 330)?")
+
+    if use_defaults:
+        cycle = default_cycle
+    else:
+        # Get user inputs
+        cycle = get_user_input("Enter the new start frequency in MHz", default_cycle)
+        
 
 
+    print("\nSummary of your input:")
+    time.sleep(1)
+    print(f"number of cycles: {cycle}")
+    
+    
+    return cycle
 
+def T1_Decay_Synchronized_parameters(t_ref,t_i,t_delay_start,t_delay_end,cycle,num_points):
+    
+    default_tau_ref = t_ref
+    default_tau_i = t_i
+    default_tau_delay_start = t_delay_start
+    default_tau_delay_end = t_delay_end
+    default_cycle = cycle
+    default_num_points = num_points
+    
+    
+    #To confirm 
+    user_default = get_confirmation("Do you want to use the default tau_ref (15ms), initialization pulse (1 microseond), the default delay time (from 0.1ms to 3 ms), the default number of cycles (330), and the default number of points (10)?")
+    
+    if user_default:
+        tau_ref = default_tau_ref 
+        tau_i = default_tau_i
+        tau_delay_start = default_tau_delay_start
+        tau_delay_end = default_tau_delay_end 
+        cycle = default_cycle
+        num_points = default_num_points
+
+
+    else:
+        tau_ref = get_user_input("Enter tau_ref (reference time in seconds)", default_tau_ref)
+        tau_i = get_user_input("Enter tau_i (pulse time in seconds)", default_tau_i)
+        tau_delay_start = get_user_input("Enter tau_delay_start (beginning of loop)", default_tau_delay_start)
+        tau_delay_end = get_user_input("Enter tau_delay_end (end of loop)", default_tau_delay_end)
+        cycle = get_user_input("Enter the number of cycles", default_cycle)
+        num_points = get_user_input("Enter the number of points collected", default_num_points)
+        
+    
+        
+        
+    print("\nSummary of your input:")
+    print(f"tau_ref: {tau_ref} s")
+    time.sleep(1)
+    print(f"tau_i: {tau_i} s")
+    time.sleep(1)
+    print(f"tau_delay_start: {tau_delay_start} s")
+    time.sleep(1)
+    print(f"tau_delay_end: {tau_delay_end} s")
+    time.sleep(1)
+    print(f"number of cycles: {cycle} ")
+    time.sleep(1)
+    print(f"number of points: {num_points} ")
+    
+    
+    return tau_ref,tau_i,tau_delay_start,tau_delay_end,cycle,num_points

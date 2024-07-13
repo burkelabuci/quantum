@@ -26,6 +26,7 @@ import os
 import csv
 from main import *
 from T1_Decay_Subroutines import *
+from T1_Decay_parameters import *
 
 base_path = r"C:\Users\BurkeLab\Desktop" # Specify the path where you want to create a data folder
 
@@ -35,16 +36,27 @@ plotname = generate_unique_filename(base_folder)# Generate unique filename with 
 
 
 #--------------------- PARAMETERS-------------------------
-tau_ref_ns=15e-3*1e9
-tau_i_ns=1e-6*1e9 # laser initialization/readout pulse width
-number_of_cycles=330
-channel_number_ref=0
+default_tau_ref = 15e-3 # reference time in seconds ; default 15e-3
+#tau_ref = 15e-3 # reference time in seconds ; default 15e-3
+default_tau_i = 1e-6 # pulse time in seconds (initialize, readout) ; default 5e-6
+default_cycles=330 #number of cycles of sequences created
+default_tau_delay_start=0.1e-3 # beginning of loop
+default_tau_delay_end= 3e-3 # beginning of loop
+default_delay_num_points = 10 #number of points collected
+
+#ask for inputs for parameters above
+tau_ref,tau_i,delay_start_s,delay_end_s,cycle,num_points = T1_Decay_Synchronized_parameters(default_tau_ref,default_tau_i,default_tau_delay_start,default_tau_delay_end,default_cycles,default_delay_num_points)
+
+#convert into nano seconds
+tau_ref_ns=tau_ref*1e9
+tau_i_ns=tau_i*1e9
+
+channel_number_ref=0 
 channel_number_pulse=1
-delay_start_s=0.1e-3
-delay_stop_s=3e-3
-delay_number_of_points=10
-step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
+step_time=cycle*2*tau_ref_ns*1e-9 # in seconds
 step_time_microseconds=step_time*1e6
+
+
 
 #--------------------- INITIALIZE PULSEBLASTER-------------------------
 PB_IPADDRESS= '169.254.8.2'
@@ -87,7 +99,7 @@ ljm.startInterval(intervalHandle, int(step_time_microseconds))
 #--------------------- DOWNLOADED PULSES STREAM TO PULSESTREAMER-------------------------
 
 
-do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,cycle,delay_start_s,delay_end_s,num_points,ps)
 
 
 
@@ -104,11 +116,11 @@ pairs = []
 columns = ['tau delay', 'labjack reading']
 
 # parameters for loop:
-loopAmount=delay_number_of_points
+loopAmount=num_points
 
 # copy of time delay array
 # Generate non-integer delays
-delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+delays = np.linspace(delay_start_s, delay_end_s, num_points)
 #print(delays)
 
 #loop over and read the signal from the Labjack T7 and append the value to the intensity array
@@ -149,7 +161,7 @@ print(pairs)  # Print the list of tuples
 with open(plotname, 'w', newline='') as csvfile:
     # Create a CSV writer object
     csvwriter = csv.writer(csvfile)   
-# Write each pair (i, i^2) as a row in the CSV file
+# Write each pair as a row in the CSV file
     for pair in pairs:
         csvwriter.writerow(pair)
 
