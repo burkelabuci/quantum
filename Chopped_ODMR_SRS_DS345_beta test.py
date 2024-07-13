@@ -54,7 +54,7 @@ step_size = int(1) # specing between each frequency point in MHz
 
 default_slope = 24 #default slope in db/Octave
 default_tau_lockin = 30 #defult lock_in time constant in milliseconds_
-rf_step_time = step_time(default_slope,default_tau_lockin) #input microwave step time in milliseconds
+rf_step_time = wait_time(default_slope,default_tau_lockin) #input microwave step time in milliseconds
 
 
 #_______________________________________________________________________________

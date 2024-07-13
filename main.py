@@ -100,7 +100,7 @@ def default_freq(f1,f2):
 #_______________________________________________________________________
 
 #program to confirm the time constant and slope of the lock-in analyzer and automatically convert to proper step time in ms of the microwave
-def step_time(slope_per_octave,tau_lockin):
+def wait_time(slope_per_octave,tau_lockin):
     default_slope = slope_per_octave
     default_tau_lockin = tau_lockin
     step_time = 0

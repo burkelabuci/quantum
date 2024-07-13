@@ -24,7 +24,14 @@ from windfreak import SynthHD, synth_hd
 from datetime import datetime
 import os
 import csv
+from main import *
 from T1_Decay_Subroutines import *
+
+base_path = r"C:\Users\BurkeLab\Desktop" # Specify the path where you want to create a data folder
+
+base_folder = create_date_folder(base_path) #create a folder with name mm/dd/yy (eg. 070324) where you want to save your data
+
+plotname = generate_unique_filename(base_folder)# Generate unique filename with name mm/dd/yy (eg. 070324)
 
 
 #--------------------- PARAMETERS-------------------------
@@ -35,7 +42,7 @@ channel_number_ref=0
 channel_number_pulse=1
 delay_start_s=0.1e-3
 delay_stop_s=3e-3
-delay_number_of_points=100
+delay_number_of_points=10
 step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
 step_time_microseconds=step_time*1e6
 
@@ -92,8 +99,6 @@ do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_
 # Initialize an empty list to store the pairs (i, i^2)
 pairs = []
 
-# Specify the filename for the CSV file
-filename = 'pairs.csv'
 
 # Define column names
 columns = ['tau delay', 'labjack reading']
@@ -141,7 +146,7 @@ print(pairs)  # Print the list of tuples
 
 
 # Open the file in 'w' mode with newline='' to prevent extra newline characters
-with open(filename, 'w', newline='') as csvfile:
+with open(plotname, 'w', newline='') as csvfile:
     # Create a CSV writer object
     csvwriter = csv.writer(csvfile)   
 # Write each pair (i, i^2) as a row in the CSV file
@@ -153,8 +158,10 @@ df = pd.DataFrame(pairs, columns=columns)
 
 
 # Save DataFrame to CSV
-df.to_csv(filename, index=False)
-print(f'Pairs saved to {filename}')
+csv_filepath = plotname  # using plotname as the CSV filename
+df.to_csv(csv_filepath, sep="\t")  # save CSV without index
+
+print(f'Pairs saved to {plotname}')
 
 # Plotting
 plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
