@@ -229,6 +229,29 @@ def create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
         (tau_i_ns, 1), 
         ((tau_ref_ns - 2 * tau_i_ns - tau_delay_ns), 0)
     ]
+    print(pattern)
+    print("sum=",sum_first_elements(pattern))
+
+
     
+
     pattern_array = pattern * n
     return pattern_array
+
+
+
+def sum_first_elements(pattern):
+    """
+    Calculate the sum of all the first elements in a list of pairs.
+
+    Parameters:
+    pattern (list of tuples): A list of pairs (tuples) where the first element is a float and the second element is an integer.
+
+    Returns:
+    float: The sum of all the first elements of the pairs.
+    """
+    return sum(pair[0] for pair in pattern)
+
+    # Example usage:
+    #example_pattern = [(1000.0, 1), (14999000.0, 0), (1000.0, 1), (100000.0, 0), (1000.0, 1), (14898000.0, 0)]
+    #print(sum_first_elements(example_pattern))
