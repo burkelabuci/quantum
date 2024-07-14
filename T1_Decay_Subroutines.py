@@ -229,7 +229,7 @@ def create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
         (tau_i_ns, 1), 
         ((tau_ref_ns - 2 * tau_i_ns - tau_delay_ns), 0)
     ]
-    print(pattern)
+    #print(pattern)
     print("sum=",sum_first_elements(pattern))
 
 

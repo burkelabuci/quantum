@@ -37,6 +37,9 @@ channel_number_pulse=1
 step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
 step_time_microseconds=step_time*1e6
 
+delay_start_s=10e-6
+delay_stop_s=100e-6
+delay_number_of_points=1000
 
 #do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,cycle,delay_start_s,delay_end_s,num_points,ps)
 
@@ -63,6 +66,15 @@ pulse_patt_decay = create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, numb
 #seq.setDigital(channel_number_pulse, pulse_patt_decay)
 print("*************************************************************************************")
 
+print("generating delays")
+# Generate non-integer delays
+delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+#print(delays)
+
+for delay in delays:
+    #print(delay, delay*1e9)
+    #print(delay*1e9)
+    pulse_patt_decay = create_pattern_array(tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles)
 
 
 
