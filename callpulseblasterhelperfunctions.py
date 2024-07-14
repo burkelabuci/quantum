@@ -13,6 +13,7 @@ from pulsestreamer import *
 import keyboard
 import time 
 from T1_Decay_Subroutines import *
+from T1_Decay_parameters import *
 
 
 # Parameters
@@ -24,28 +25,31 @@ ps.setTrigger(TriggerStart.SOFTWARE)
 
 
 
+#--------------------- PARAMETERS-------------------------
+default_tau_ref = 15e-3 # reference time in seconds ; default 15e-3
+#tau_ref = 15e-3 # reference time in seconds ; default 15e-3
+default_tau_i = 1e-6 # pulse time in seconds (initialize, readout) ; default 5e-6
+default_cycles=330 #number of cycles of sequences created
+default_tau_delay_start=0.1e-3 # beginning of loop
+default_tau_delay_end= 3e-3 # beginning of loop
+default_delay_num_points = 10 #number of points collected
 
-# Create sequence object 
-#seq = ps.createSequence()
-#seqdelay=createsquarewavesequence(0,15e-3,6,ps)
-tau_ref_ns=15e-3*1e9
-tau_i_ns=1e-6*1e9 # laser initialization/readout pulse width
-number_of_cycles=33
-#number_of_cycles=12
-channel_number_ref=0
+#ask for inputs for parameters above
+tau_ref,tau_i,delay_start_s,delay_end_s,cycle,num_points = T1_Decay_Synchronized_parameters(default_tau_ref,default_tau_i,default_tau_delay_start,default_tau_delay_end,default_cycles,default_delay_num_points)
+
+#convert into nano seconds
+tau_ref_ns=tau_ref*1e9
+tau_i_ns=tau_i*1e9
+
+channel_number_ref=0 
 channel_number_pulse=1
-delay_start_s=0.1e-3
-delay_stop_s=5e-3
-delay_number_of_points=100
+step_time=cycle*2*tau_ref_ns*1e-9 # in seconds
+step_time_microseconds=step_time*1e6
 
 
-
-do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-
+do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,cycle,delay_start_s,delay_end_s,num_points,ps)
 
 
-tau_delay_ns=10e-6*1e9
-#create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps)
 
 
 for i in range(1, 11):
