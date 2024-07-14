@@ -39,7 +39,7 @@ step_time_microseconds=step_time*1e6
 
 delay_start_s=10e-6
 delay_stop_s=100e-6
-delay_number_of_points=1000
+delay_number_of_points=10
 
 #do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,cycle,delay_start_s,delay_end_s,num_points,ps)
 
@@ -50,6 +50,13 @@ square_wave_half_cycle_ns=tau_ref_ns
 # pulse_patt = [(100, 0), (200, 1), (80, 0), (300, 1), (60, 0)]
 
 pulse_patt_ref = generate_alternating_pairs(square_wave_half_cycle_ns,2*number_of_cycles)
+print("*************************************************************************************")
+print(pulse_patt_ref)
+print("*************************************************************************************")
+
+print("sum of alternating pulse_patt_ref=",sum_first_elements(pulse_patt_ref))
+should_be = square_wave_half_cycle_ns*2*number_of_cycles
+print("should be",should_be)
 print("*************************************************************************************")
 
 #print(pulse_patt_ref)
