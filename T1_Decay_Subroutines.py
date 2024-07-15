@@ -71,6 +71,7 @@ def createsquarewavesequence(channel_number,square_wave_half_cycle_s,number_of_c
     # channel_number is the channel number (default 0)
     # return is a sequence in pulseblaster format
     # reference : https://www.swabianinstruments.com/static/documentation/PulseStreamer/sections/api-doc.html
+    # Note: Internally, the Pulse Streamer hardware is always splitting the sequence data into 8 nanosecond long chunks. 
 
     #print("****************************************************************")
 
@@ -165,7 +166,15 @@ def create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     # pulse_patt = [(100, 0), (200, 1), (80, 0), (300, 1), (60, 0)]
 
     pulse_patt_ref = generate_alternating_pairs(square_wave_half_cycle_ns,2*number_of_cycles)
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref))
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+    print("---------------------------------------------------")
+    print("tau_delay_ns=",tau_delay_ns)
+    print("pulse_patt_ref=")
     print(pulse_patt_ref)
+    print("---------------------------------------------------")
     seq.setDigital(channel_number_ref, pulse_patt_ref)
 
 
@@ -173,9 +182,21 @@ def create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     #*********** THEN PULSE CYCLE
     
 
-    pulse_patt_decay = create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    #pulse_patt_decay = create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
     
+    pulse_patt_decay = create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_decay sum=",sum_first_elements(pulse_patt_decay))
+    #print("pulse_patt_decay sum divided by 8 ns=",sum_first_elements(pulse_patt_decay)/8)
+    
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+    print("---------------------------------------------------")
+    print("tau_delay_ns=",tau_delay_ns)
+    print("pulse_patt_decay=")
     print(pulse_patt_decay)
+    print("---------------------------------------------------")
+    #print(pulse_patt_decay)
     seq.setDigital(channel_number_pulse, pulse_patt_decay)
 
     return seq
@@ -185,7 +206,15 @@ def do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number
 
     # Generate non-integer delays
     delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+    print("delays=")
     print(delays)
+
+    # Apply the rounding function to each delay
+    #rounded_delays = np.array([round_to_nearest_8ns(delay) for delay in delays])
+    #print("rounded_delays=")
+    #print(rounded_delays)
+
+
 
     # Create sequences using the non-integer delays
     sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
@@ -217,6 +246,7 @@ def generate_alternating_pairs(x_value, num_pairs):
         list of tuples: The generated (x, y) pairs.
     """
     #return [(x_value, i % 2) for i in range(num_pairs)]
+    
     return [(x_value,1- i % 2) for i in range(num_pairs)]
 
 
@@ -232,3 +262,46 @@ def create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
     
     pattern_array = pattern * n
     return pattern_array
+
+def create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
+    #round_to_nearest_8ns(value)
+    tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
+    tau_i_ns_rounded=round_to_nearest_8ns(tau_i_ns)
+    tau_delay_ns_rounded=round_to_nearest_8ns(tau_delay_ns)
+    
+    pattern = [
+        (tau_i_ns_rounded, 1), 
+        ((tau_ref_ns_rounded - tau_i_ns_rounded), 0), 
+        (tau_i_ns_rounded, 1), 
+        (tau_delay_ns_rounded, 0), 
+        (tau_i_ns_rounded, 1), 
+        ((tau_ref_ns_rounded - 2 * tau_i_ns_rounded - tau_delay_ns_rounded), 0)
+    ]
+    
+    pattern_array = pattern * n
+    return pattern_array
+
+def sum_first_elements(pattern):
+    """
+    Calculate the sum of all the first elements in a list of pairs.
+
+    Parameters:
+    pattern (list of tuples): A list of pairs (tuples) where the first element is a float and the second element is an integer.
+
+    Returns:
+    float: The sum of all the first elements of the pairs.
+    """
+    return sum(pair[0] for pair in pattern)
+
+    # Example usage:
+    #example_pattern = [(1000.0, 1), (14999000.0, 0), (1000.0, 1), (100000.0, 0), (1000.0, 1), (14898000.0, 0)]
+    #print(sum_first_elements(example_pattern))
+    
+     
+     
+     
+     
+def round_to_nearest_8ns(value_in_ns):
+     # Function to round each delay to the nearest multiple of 8 ns
+    ns_per_step = 8  # 8 nanoseconds
+    return int( round(value_in_ns / ns_per_step) * ns_per_step   )
