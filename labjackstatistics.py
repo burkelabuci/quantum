@@ -16,11 +16,18 @@ import time
 import csv
 import csv
 import pandas as pd
+from main import *
+#__________________________________________________________________________
 
+base_path = r"C:\Users\BurkeLab\Desktop" # Specify the path where you want to create a data folder
+
+base_folder = create_date_folder(base_path) #create a folder with name mm/dd/yy (eg. 070324) where you want to save your data
+
+plotname = generate_unique_filename(base_folder)# Generate unique filename with name mm/dd/yy (eg. 070324)
 #***************************************************************************************
 #Parameters:
 t_wait =10 # wait time between points in seconds
-num_readings=100 # total # of readings
+num_readings=5 # total # of readings
 
 t_each= 100 #milliseconds Minghao what is this ??????
 
@@ -30,7 +37,7 @@ t_each= 100 #milliseconds Minghao what is this ??????
 #plotname= str(input("Enter the name of the data following BurkeLab Rules MMDDYYNNN(example names: 0617240001 do not use special characters or spaces)"))
 
 
-
+print(f"Data file successully created: {plotname}")
 #***************************************************************************************
 # Initialize labjack
 
@@ -128,10 +135,9 @@ plt.show()
 #***************************************************************************************
 # Save to file
 # Specify the filename for the CSV file
-filename = 'pairs.csv'
 columns = ['point_number', 'labjack reading']
 # Open the file in 'w' mode with newline='' to prevent extra newline characters
-with open(filename, 'w', newline='') as csvfile:
+with open(plotname, 'w', newline='') as csvfile:
     # Create a CSV writer object
     csvwriter = csv.writer(csvfile)
         
@@ -146,9 +152,9 @@ with open(filename, 'w', newline='') as csvfile:
 df = pd.DataFrame({'labjack reading': readings}, index=pd.RangeIndex(start=1, stop=len(readings)+1, name='point_number'))
 
 # Save DataFrame to CSV (excluding index)
-df.to_csv(filename, index=False)
+df.to_csv(plotname, index=False)
 
-print(f'Pairs saved to {filename}')
+print(f'Data successfully saved to {plotname}')
 
 #********************CHATGPTSAVETOFILE**********************
 
