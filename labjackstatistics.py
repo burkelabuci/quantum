@@ -26,7 +26,7 @@ base_folder = create_date_folder(base_path) #create a folder with name mm/dd/yy 
 plotname = generate_unique_filename(base_folder)# Generate unique filename with name mm/dd/yy (eg. 070324)
 #***************************************************************************************
 #Parameters:
-t_wait =10 # wait time between points in seconds
+t_wait =1 # wait time between points in seconds
 num_readings=5 # total # of readings
 
 t_each= 100 #milliseconds Minghao what is this ??????
@@ -120,7 +120,13 @@ plt.axhline(y=average_reading, color='r', linestyle='--', label=f'Average: {aver
 plt.fill_between(range(len(readings_array)), 
                  average_reading - std_deviation, 
                  average_reading + std_deviation, 
-                 color='gray', alpha=0.2, label=f'Std Dev: {std_deviation:.2f}')
+                 color='gray', alpha=0.2, label=f'Std Dev: {std_deviation:.2e}')
+
+
+
+# make y axis start at zero
+# Set y-axis limits to ensure the actual value display
+#plt.ylim(min(0, np.min(readings_array) - std_deviation), np.max(readings_array) + std_deviation)
 
 # Add labels and title
 plt.xlabel('Index')
