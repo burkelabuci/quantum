@@ -31,9 +31,9 @@ import os
 start_frequency = 2800 #in MHz
 stop_frequency = 3000 #in MHz
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(30) #in milliseconds
+step_time = int(300) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
-base_folder = r"C:\Users\BurkeLab\Desktop\070824" # Specify the base folder where you want to save the files
+base_folder = r"C:\Users\BurkeLab\Desktop\071724" # Specify the base folder where you want to save the files
 
 #arrays that will be used for plot
 frequencies= []

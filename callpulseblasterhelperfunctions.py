@@ -39,14 +39,14 @@ step_time_microseconds=step_time*1e6
 tau_delay_ns=1e-3*1e9
 
 create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps)
-
+#create_fig3_teachingpaper_pulse_sequence_no_init_pulse(tau_ref_ns,tau_i_ns,tau_delay_ns,ps)
 
 # Count down from 10
-print("Countdown....")
-for i in range(10, 0, -1):
-    print(i)
-    time.sleep(1)
-print("BLASTOFF!")
+#print("Countdown....")
+#for i in range(10, 0, -1):
+#    print(i)
+#    time.sleep(1)
+#print("BLASTOFF!")
 
 print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 ps.startNow()

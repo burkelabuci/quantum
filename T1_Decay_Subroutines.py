@@ -40,16 +40,19 @@ def create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps
 
 
 
-
     # Create sequence object 
     seq = ps.createSequence()
 
-
+    # STILL Need to round to 8 ns...
     # Set channel 0 as refrence (pulse duration in nanoseconds)
     seq.setDigital(0, [(tau_ref_ns, 1), (tau_ref_ns, 0)])
 
     # Set channel 1 as the laser pulse sequence (pulse duration in nanoseconds)
-    seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),((tau_i_ns), 1),((tau_delay_ns),0),((tau_i_ns), 1), ((tau_ref_ns-2*tau_i_ns-tau_delay_ns), 0)])
+    # Fix 8 ns rounding:
+#    seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),((tau_i_ns), 1),((tau_delay_ns),0),((tau_i_ns), 1), ((tau_ref_ns-2*tau_i_ns-tau_delay_ns), 0)])
+    pulse_patt_decay = create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, 1)
+    seq.setDigital(1,pulse_patt_decay) 
+    
 
  
     ps.stream(seq)  # runs forever , but returns program
@@ -60,6 +63,43 @@ def create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps
 
 
     return
+
+
+def create_fig3_teachingpaper_pulse_sequence_no_init_pulse(tau_ref_ns,tau_i_ns,tau_delay_ns,ps: PulseStreamer):
+    # Creates patter in fig 3 of teaching paper
+    # ps is the pulsestreamer object
+    # duration is how long the stream runs for in seconds
+
+    #print("****************************************************************")
+    #print("Start inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("tau_ref_ns,tau_i_ns,tau_delay_ns=")
+    #print(tau_ref_ns,tau_i_ns,tau_delay_ns)
+
+
+
+
+    # Create sequence object 
+    seq = ps.createSequence()
+
+
+    # Set channel 0 as refrence (pulse duration in nanoseconds)
+    seq.setDigital(0, [(tau_ref_ns, 1), (tau_ref_ns, 0)])
+
+    # Set channel 1 as the laser pulse sequence (pulse duration in nanoseconds)
+    #seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),((tau_i_ns), 1),((tau_delay_ns),0),((tau_i_ns), 1), ((tau_ref_ns-2*tau_i_ns-tau_delay_ns), 0)])
+    pulse_patt_decay = create_pattern_array__no_init_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, 1)
+    seq.setDigital(1,pulse_patt_decay) 
+    
+ 
+    ps.stream(seq)  # runs forever , but returns program
+
+    #print("Done inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("****************************************************************")
+
+
+
+    return
+
 
 
 

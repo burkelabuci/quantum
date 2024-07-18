@@ -26,8 +26,8 @@ base_folder = create_date_folder(base_path) #create a folder with name mm/dd/yy 
 plotname = generate_unique_filename(base_folder)# Generate unique filename with name mm/dd/yy (eg. 070324)
 #***************************************************************************************
 #Parameters:
-t_wait =1 # wait time between points in seconds
-num_readings=5 # total # of readings
+t_wait =10 # wait time between points in seconds
+num_readings=100 # total # of readings
 
 t_each= 100 #milliseconds Minghao what is this ??????
 
