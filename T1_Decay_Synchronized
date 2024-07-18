@@ -69,7 +69,7 @@ n_repeats=250 # number of times pattern repeated within a cycle
 
 mw_pulse_length_start_ns=0.1e-6*1e9
 mw_pulse_length_stop_ns=3e-6*1e9
-mw_pulse_length_number_of_points=5
+mw_pulse_length_number_of_points=10
 
 
 #--------------------- INITIALIZE PULSEBLASTER-------------------------
@@ -78,7 +78,7 @@ PB_IPADDRESS= '169.254.8.2'
 ps = PulseStreamer(PB_IPADDRESS)
 
 
-ps.setTrigger(TriggerStart.SOFTWARE)
+#ps.setTrigger(TriggerStart.SOFTWARE)
 
 
 #--------------------- INITIALIZE LABJACK-------------------------
@@ -118,7 +118,13 @@ ljm.startInterval(intervalHandle, int(step_time_microseconds))
 
 #do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
-rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
+#rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
+
+sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
+
+print("-----------------------------")
+print("sequences created")
+print("-----------------------------")
 
 
 #--------------LOOP SETUP----------------------------
@@ -155,30 +161,51 @@ if(fig_mode==4):
 
 
 
+
 #--------------LOOP START----------------------------
 
 # Count down from 10
-print("Countdown....")
-for i in range(10, 0, -1):
-    print(i)
-    time.sleep(1)
-print("BLASTOFF!")
+if(fig_mode==3):
+    print("Countdown....")
+    for i in range(10, 0, -1):
+        print(i)
+        time.sleep(1)
+    print("BLASTOFF!")
 
 print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-ps.startNow()
 
-for tau in delays:
-    try:
+
+
+if(fig_mode==3):
+
+    ps.startNow()
+    for tau in delays:
+        try:
+            results = ljm.eReadNames(handle, numFrames, names)
+            print(tau,abs(results[0]))
+            pairs.append((tau,abs(results[0])))  # Append the tuple to the list
+            ljm.waitForNextInterval(intervalHandle)
+        except KeyboardInterrupt:
+            break
+        except Exception:
+            print(sys.exc_info()[1])
+            break
+
+if(fig_mode==4):
+
+    for element in sequences:
+        print("**********************")
+        #print(element)
+        print("Current Time:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        ps.stream(element)
+        ps.startNow()
+        time.sleep(1)
         results = ljm.eReadNames(handle, numFrames, names)
-        print(tau,abs(results[0]))
-        pairs.append((tau,abs(results[0])))  # Append the tuple to the list
+        print("bla bla bla",abs(results[0]))
+        pairs.append((1,abs(results[0])))  # Append the tuple to the list
         ljm.waitForNextInterval(intervalHandle)
-    except KeyboardInterrupt:
-        break
-    except Exception:
-        print(sys.exc_info()[1])
-        break
 
+        print("**********************")
     
     
 

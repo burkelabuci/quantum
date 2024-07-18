@@ -341,8 +341,8 @@ def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     square_wave_half_cycle_ns=tau_ref_ns
 
     pulse_patt_ref = generate_alternating_pairs(square_wave_half_cycle_ns,2*number_of_cycles)
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref)/1e9)
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref)/1e9)
 
     #print("---------------------------------------------------")
     #print("pulse_patt_ref=")
@@ -355,8 +355,8 @@ def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     # But under variable microwave pulse, ???
     #*********** THEN PULSE CYCLE LASER***********************
     pulse_patt_laser = create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeats,number_of_cycles)
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("pulse_patt_laser sum=",sum_first_elements(pulse_patt_laser)/1e9)
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_laser sum=",sum_first_elements(pulse_patt_laser)/1e9)
     #print(pulse_patt_laser)
     seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
     
@@ -364,8 +364,8 @@ def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
 
     
     pulse_patt_mw = create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeats,number_of_cycles)
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("pulse_patt_mw sum=",sum_first_elements(pulse_patt_mw)/1e9)
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_mw sum=",sum_first_elements(pulse_patt_mw)/1e9)
     #print(pulse_patt_mw)
     #print("---------------------------------------------------")
     seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
@@ -611,6 +611,42 @@ def rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,t
     # Add all the sequences together
     result_sequence = sum(sequences[1:], sequences[0])
     ps.stream(result_sequence)  # runs forever , but returns program
+
+
+
+def rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps):
+         
+
+    #mw_pulse_length_start_ns=0
+    #mw_pulse_length_stop_ns=3e-6*1e-9
+    #mw_pulse_length_number_of_points=10
+
+    # As fig 4 teaching paper
+    # Generate non-integer microwave pulse times
+    mw_pulse_lengths_ns = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
+    print("mw_pulse_lengths_ns=")
+    print(mw_pulse_lengths_ns)
+
+    # Apply the rounding function to each delay
+    #rounded_delays = np.array([round_to_nearest_8ns(delay) for delay in delays])
+    #print("rounded_delays=")
+    #print(rounded_delays)
+
+    # Create sequences using the non-integer delays
+    #sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
+    #sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
+
+
+    sequences= [create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_ns,tau_padding_ns,n_repeats,number_of_cycles,ps)for mw_pulse_length_ns in mw_pulse_lengths_ns]
+
+
+    # old one has integer value of delays
+    #sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,delay*1e-3*1e9,number_of_cycles,ps) for delay in range(1, 11)]
+
+    # Add all the sequences together
+    result_sequence = sum(sequences[1:], sequences[0])
+    #ps.stream(result_sequence)  # runs forever , but returns program
+    return sequences
 
 
 def do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps):
