@@ -69,7 +69,7 @@ n_repeats=250 # number of times pattern repeated within a cycle
 
 mw_pulse_length_start_ns=0.1e-6*1e9
 mw_pulse_length_stop_ns=3e-6*1e9
-mw_pulse_length_number_of_points=10
+mw_pulse_length_number_of_points=100
 
 
 #--------------------- INITIALIZE PULSEBLASTER-------------------------
