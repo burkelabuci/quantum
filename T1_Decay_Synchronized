@@ -192,26 +192,27 @@ if(fig_mode==3):
             break
 
 if(fig_mode==4):
+    print("Tau(ns), result, time")
+    for sequence, tau in zip(sequences, delays):
+    # Your code here
+        #print(f"Sequence: {sequence}, Tau: {tau}")
 
-    for element in sequences:
-        print("**********************")
-        #print(element)
-        print("Current Time:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        ps.stream(element)
+        #print("Tau, Current Time:",tau, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        ps.stream(sequence)
         ps.startNow()
         time.sleep(1)
         results = ljm.eReadNames(handle, numFrames, names)
-        print("bla bla bla",abs(results[0]))
-        pairs.append((1,abs(results[0])))  # Append the tuple to the list
+        pairs.append((tau,abs(results[0])))  # Append the tuple to the list
+        x=abs(results[0])
+        print(int(tau),f"{x:.3f}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
+        #print(tau,abs(results[0]))
         ljm.waitForNextInterval(intervalHandle)
 
-        print("**********************")
-    
     
 
 #--------------------- DISPLAY DATA AND SAVE TO FILE-------------------------
 
-print(pairs)  # Print the list of tuples
+#print(pairs)  # Print the list of tuples
 
 
 # Open the file in 'w' mode with newline='' to prevent extra newline characters
