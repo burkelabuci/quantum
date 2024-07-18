@@ -67,8 +67,8 @@ tau_padding_ns=0
 #n_repeats=250 # number of times pattern repeated within a cycle
 n_repeats=250 # number of times pattern repeated within a cycle
 
-mw_pulse_length_start_ns=0.1e-6*1e9
-mw_pulse_length_stop_ns=3e-6*1e9
+mw_pulse_length_start_ns=0.01e-6*1e9
+mw_pulse_length_stop_ns=500e-9*1e9
 mw_pulse_length_number_of_points=100
 
 
@@ -200,7 +200,7 @@ if(fig_mode==4):
         #print("Tau, Current Time:",tau, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         ps.stream(sequence)
         ps.startNow()
-        time.sleep(1)
+        time.sleep(2)
         results = ljm.eReadNames(handle, numFrames, names)
         pairs.append((tau,abs(results[0])))  # Append the tuple to the list
         x=abs(results[0])
