@@ -65,6 +65,38 @@ def create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps
     return
 
 
+def create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_ns,n_repeats,ps: PulseStreamer):
+    # Creates patter in fig 4 of teaching paper
+    # ps is the pulsestreamer object
+    # n_repeats is how long many repeats per cycle
+
+
+    # Create sequence object 
+    seq = ps.createSequence()
+
+    # STILL Need to round to 8 ns...
+    # Set channel 0 as refrence (pulse duration in nanoseconds)
+    seq.setDigital(0, [(tau_ref_ns, 1), (tau_ref_ns, 0)])
+
+    # Set channel 1 as the laser pulse sequence (pulse duration in nanoseconds)
+    # Fix 8 ns rounding:
+#    seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),((tau_i_ns), 1),((tau_delay_ns),0),((tau_i_ns), 1), ((tau_ref_ns-2*tau_i_ns-tau_delay_ns), 0)])
+    pulse_patt_decay_laser = create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeats,1)
+    seq.setDigital(1,pulse_patt_decay_laser) 
+    
+    # Set channel 2 as the microwave pulse sequence (pulse duration in nanoseconds)
+    pulse_patt_decay_mw = create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeats,1)
+    seq.setDigital(2,pulse_patt_decay_mw) 
+ 
+    ps.stream(seq)  # runs forever , but returns program
+
+    #print("Done inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("****************************************************************")
+
+
+
+    return
+
 def create_fig3_teachingpaper_pulse_sequence_different_init_and_readout_pulsewidth(tau_ref_ns,tau_i_ns,tau_readout_ns,tau_delay_ns,ps: PulseStreamer):
     # Creates patter in fig 3 of teaching paper
     # ps is the pulsestreamer object
@@ -597,6 +629,62 @@ def create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
     
     pattern_array = pattern * n
     return pattern_array
+
+def create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeat,n):
+
+    #round_to_nearest_8ns(value)
+    tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
+    tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
+    tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
+    tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
+    
+    pattern_1_subunit = [
+        (tau_laser_ns_rounded, 1), 
+        (tau_mw_ns, 0)
+    ]
+    
+    pattern_1=pattern_1_subunit*n_repeat
+    
+    pattern_2_subunit = [
+        (tau_laser_ns_rounded, 1), 
+        (tau_mw_ns, 0)
+    ]
+    
+    pattern_2=pattern_2_subunit*n_repeat 
+    
+    pattern = pattern_1 + pattern_2
+    
+    pattern_array = pattern * n
+    return pattern_array
+
+
+def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeat,n):
+
+    #round_to_nearest_8ns(value)
+    tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
+    tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
+    tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
+    tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
+    
+    pattern_1_subunit = [
+        (tau_laser_ns_rounded, 0), 
+        (tau_mw_ns, 1)
+    ]
+    
+    pattern_1=pattern_1_subunit*n_repeat
+    
+    pattern_2_subunit = [
+        (tau_laser_ns_rounded, 0), 
+        (tau_mw_ns, 0)
+    ]
+    
+    pattern_2=pattern_2_subunit*n_repeat 
+    
+    pattern = pattern_1 + pattern_2
+    
+    pattern_array = pattern * n
+    return pattern_array
+
 
 def create_pattern_array_rounded_to_8_ns_different_init_and_readout_pulsewidth(tau_ref_ns, tau_i_ns, tau_readout_ns,tau_delay_ns, n):
     #round_to_nearest_8ns(value)
