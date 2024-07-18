@@ -36,7 +36,9 @@ plotname = generate_unique_filename(base_folder)# Generate unique filename with 
 
 #--------------------- PARAMETERS-------------------------
 tau_ref_ns=15e-3*1e9
-tau_i_ns=5e-6*1e9 # laser initialization/readout pulse width
+tau_i_ns=5e-6*1e9 # laser initialization pulse width
+#tau_readout_ns=tau_i_ns # laser readout pulse width
+tau_readout_ns=1e-6*1e9 # laser initialization pulse width
 number_of_cycles=330 # default 33; sets how long each pulse pattern is for a given delay
 channel_number_ref=0
 channel_number_pulse=1
@@ -87,8 +89,10 @@ ljm.startInterval(intervalHandle, int(step_time_microseconds))
 #--------------------- DOWNLOADED PULSES STREAM TO PULSESTREAMER-------------------------
 
 
-do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 #do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+
+do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 
 

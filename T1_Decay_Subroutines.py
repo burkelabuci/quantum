@@ -65,6 +65,45 @@ def create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps
     return
 
 
+def create_fig3_teachingpaper_pulse_sequence_different_init_and_readout_pulsewidth(tau_ref_ns,tau_i_ns,tau_readout_ns,tau_delay_ns,ps: PulseStreamer):
+    # Creates patter in fig 3 of teaching paper
+    # ps is the pulsestreamer object
+    # duration is how long the stream runs for in seconds
+    # tau_readout_ns is the readout pulse width
+    # tau_i_ns is the intitialization pulse width
+    #print("****************************************************************")
+    #print("Start inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("tau_ref_ns,tau_i_ns,tau_delay_ns=")
+    #print(tau_ref_ns,tau_i_ns,tau_delay_ns)
+
+
+
+    # Create sequence object 
+    seq = ps.createSequence()
+
+    # STILL Need to round to 8 ns...
+    # Set channel 0 as refrence (pulse duration in nanoseconds)
+    seq.setDigital(0, [(tau_ref_ns, 1), (tau_ref_ns, 0)])
+
+    # Set channel 1 as the laser pulse sequence (pulse duration in nanoseconds)
+    # Fix 8 ns rounding:
+#    seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),((tau_i_ns), 1),((tau_delay_ns),0),((tau_i_ns), 1), ((tau_ref_ns-2*tau_i_ns-tau_delay_ns), 0)])
+    #pulse_patt_decay = create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, 1)
+    pulse_patt_decay = create_pattern_array_rounded_to_8_ns_different_init_and_readout_pulsewidth(tau_ref_ns, tau_i_ns,tau_readout_ns, tau_delay_ns, 1)
+    
+    seq.setDigital(1,pulse_patt_decay) 
+    
+
+ 
+    ps.stream(seq)  # runs forever , but returns program
+
+    #print("Done inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("****************************************************************")
+
+
+
+    return
+
 def create_fig3_teachingpaper_pulse_sequence_no_init_pulse(tau_ref_ns,tau_i_ns,tau_delay_ns,ps: PulseStreamer):
     # Creates patter in fig 3 of teaching paper
     # ps is the pulsestreamer object
@@ -242,6 +281,67 @@ def create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     return seq
 
 
+
+def create_fig3_teachingpaper_pulse_sequence_repeated_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,tau_delay_ns,number_of_cycles,ps: PulseStreamer):
+    # Creates patter in fig 3 of teaching paper
+    # ps is the pulsestreamer object
+    # duration is how long the stream runs for in seconds
+
+    #print("****************************************************************")
+    #print("Start inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("tau_ref_ns,tau_i_ns,tau_delay_ns=")
+    #print(tau_ref_ns,tau_i_ns,tau_delay_ns)
+    
+    
+
+    # Create sequence object 
+    seq = ps.createSequence()
+    
+    #************* SQUAREWAVE FIRST*******************
+    
+    square_wave_half_cycle_ns=tau_ref_ns
+
+    # pulse_patt = [(100, 0), (200, 1), (80, 0), (300, 1), (60, 0)]
+
+    pulse_patt_ref = generate_alternating_pairs(square_wave_half_cycle_ns,2*number_of_cycles)
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref))
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+    print("---------------------------------------------------")
+    print("tau_delay_ns=",tau_delay_ns)
+    print("pulse_patt_ref=")
+    print(pulse_patt_ref)
+    print("---------------------------------------------------")
+    seq.setDigital(channel_number_ref, pulse_patt_ref)
+
+
+    
+    #*********** THEN PULSE CYCLE
+    
+
+    #pulse_patt_decay = create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    
+    #pulse_patt_decay = create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    pulse_patt_decay = create_pattern_array_rounded_to_8_ns_different_init_and_readout_pulsewidth(tau_ref_ns, tau_i_ns,tau_readout_ns, tau_delay_ns, number_of_cycles)
+    
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_decay sum=",sum_first_elements(pulse_patt_decay))
+    #print("pulse_patt_decay sum divided by 8 ns=",sum_first_elements(pulse_patt_decay)/8)
+    
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+    print("---------------------------------------------------")
+    print("tau_delay_ns=",tau_delay_ns)
+    print("pulse_patt_decay=")
+    print(pulse_patt_decay)
+    print("---------------------------------------------------")
+    #print(pulse_patt_decay)
+    seq.setDigital(channel_number_pulse, pulse_patt_decay)
+
+    return seq
+
+
 def create_fig3_teachingpaper_pulse_sequence_repeated_no_init_pulse(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_delay_ns,number_of_cycles,ps: PulseStreamer):
     # Creates patter in fig 3 of teaching paper
     # ps is the pulsestreamer object
@@ -300,6 +400,67 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_no_init_pulse(channel_numb
 
     return seq
 
+
+
+def create_fig3_teachingpaper_pulse_sequence_repeated_no_init_pulse(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_delay_ns,number_of_cycles,ps: PulseStreamer):
+    # Creates patter in fig 3 of teaching paper
+    # ps is the pulsestreamer object
+    # duration is how long the stream runs for in seconds
+
+    #print("****************************************************************")
+    #print("Start inside of create_fig3_teachingpaper_pulse_sequence ")
+    #print("tau_ref_ns,tau_i_ns,tau_delay_ns=")
+    #print(tau_ref_ns,tau_i_ns,tau_delay_ns)
+    
+    
+
+    # Create sequence object 
+    seq = ps.createSequence()
+    
+    #************* SQUAREWAVE FIRST*******************
+    
+    square_wave_half_cycle_ns=tau_ref_ns
+
+    # pulse_patt = [(100, 0), (200, 1), (80, 0), (300, 1), (60, 0)]
+
+    pulse_patt_ref = generate_alternating_pairs(square_wave_half_cycle_ns,2*number_of_cycles)
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref))
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+    print("---------------------------------------------------")
+    print("tau_delay_ns=",tau_delay_ns)
+    print("pulse_patt_ref=")
+    print(pulse_patt_ref)
+    print("---------------------------------------------------")
+    seq.setDigital(channel_number_ref, pulse_patt_ref)
+
+
+    
+    #*********** THEN PULSE CYCLE
+    
+
+    #pulse_patt_decay = create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    
+    #pulse_patt_decay = create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    pulse_patt_decay = create_pattern_array__no_init_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("pulse_patt_decay sum=",sum_first_elements(pulse_patt_decay))
+    #print("pulse_patt_decay sum divided by 8 ns=",sum_first_elements(pulse_patt_decay)/8)
+    
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+    print("---------------------------------------------------")
+    print("tau_delay_ns=",tau_delay_ns)
+    print("pulse_patt_decay=")
+    print(pulse_patt_decay)
+    print("---------------------------------------------------")
+    #print(pulse_patt_decay)
+    seq.setDigital(channel_number_pulse, pulse_patt_decay)
+
+    return seq
+
+
 def do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps):
 
 
@@ -324,6 +485,38 @@ def do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number
     # Add all the sequences together
     result_sequence = sum(sequences[1:], sequences[0])
     ps.stream(result_sequence)  # runs forever , but returns program
+
+
+def do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps):
+
+
+    # tau_readout_ns is the readout pulse width
+    # tau_i_ns is the intitialization pulse width
+    # Generate non-integer delays
+    delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+    print("delays=")
+    print(delays)
+
+    # Apply the rounding function to each delay
+    #rounded_delays = np.array([round_to_nearest_8ns(delay) for delay in delays])
+    #print("rounded_delays=")
+    #print(rounded_delays)
+
+
+
+    # Create sequences using the non-integer delays
+    #sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
+    sequences = [create_fig3_teachingpaper_pulse_sequence_repeated_different_init_and_readout_pulsewidth(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns,tau_readout_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
+
+
+    # old one has integer value of delays
+    #sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,delay*1e-3*1e9,number_of_cycles,ps) for delay in range(1, 11)]
+
+    # Add all the sequences together
+    result_sequence = sum(sequences[1:], sequences[0])
+    ps.stream(result_sequence)  # runs forever , but returns program
+
+
 
 def do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps):
 
@@ -400,6 +593,25 @@ def create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
         (tau_delay_ns_rounded, 0), 
         (tau_i_ns_rounded, 1), 
         ((tau_ref_ns_rounded - 2 * tau_i_ns_rounded - tau_delay_ns_rounded), 0)
+    ]
+    
+    pattern_array = pattern * n
+    return pattern_array
+
+def create_pattern_array_rounded_to_8_ns_different_init_and_readout_pulsewidth(tau_ref_ns, tau_i_ns, tau_readout_ns,tau_delay_ns, n):
+    #round_to_nearest_8ns(value)
+    tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
+    tau_i_ns_rounded=round_to_nearest_8ns(tau_i_ns)
+    tau_delay_ns_rounded=round_to_nearest_8ns(tau_delay_ns)
+    tau_readout_ns_rounded=round_to_nearest_8ns(tau_readout_ns)
+    
+    pattern = [
+        (tau_i_ns_rounded, 1), 
+        ((tau_ref_ns_rounded - tau_i_ns_rounded), 0), 
+        (tau_i_ns_rounded, 1), 
+        (tau_delay_ns_rounded, 0), 
+        (tau_readout_ns_rounded, 1), 
+        ((tau_ref_ns_rounded -  tau_i_ns_rounded -tau_readout_ns_rounded- tau_delay_ns_rounded), 0)
     ]
     
     pattern_array = pattern * n
