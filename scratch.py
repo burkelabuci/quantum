@@ -64,3 +64,12 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_different_init_and_readout
     
     create_pattern_array_rounded_to_8_ns
     
+    
+    
+    
+
+
+
+rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,ps)
+
+def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_delay_ns,number_of_cycles,ps: PulseStreamer):

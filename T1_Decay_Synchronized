@@ -35,24 +35,42 @@ plotname = generate_unique_filename(base_folder)# Generate unique filename with 
 
 
 #--------------------- PARAMETERS-------------------------
-tau_ref_ns=15e-3*1e9
+
+# Fig 3 only
 tau_i_ns=5e-6*1e9 # laser initialization pulse width
 #tau_readout_ns=tau_i_ns # laser readout pulse width
-tau_readout_ns=1e-6*1e9 # laser initialization pulse width
-number_of_cycles=330 # default 33; sets how long each pulse pattern is for a given delay
-channel_number_ref=0
-channel_number_pulse=1
+tau_readout_ns=1e-6*1e9 # laser readout pulse width
 delay_start_s=3e-3
 delay_stop_s=0.01e-3
 delay_number_of_points=100
+
+# for both fig 3 and fig 4
+fig_mode=4 # 3 for figure 3 , 4 for figure 4
+
+tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4.
+number_of_cycles=200 # default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay
+# for fig 4 200 Hz default, so want 200 cycles if 1 second between each point
 step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
 step_time_microseconds=step_time*1e6
 
+channel_number_ref=0
+channel_number_pulse=1
+channel_number_laser_pulse=1 # same thing as channel_number_pulse
+channel_number_mw_pulse=2
+
+
 # for Fig 4
 tau_laser_ns=5e-6*1e9
+number_of_cycles=200
 tau_mw_ns=5e-6*1e9
 tau_padding_ns=0
-n_repeats=250
+#n_repeats=250 # number of times pattern repeated within a cycle
+n_repeats=250 # number of times pattern repeated within a cycle
+
+mw_pulse_length_start_ns=0.1e-6*1e9
+mw_pulse_length_stop_ns=3e-6*1e9
+mw_pulse_length_number_of_points=5
+
 
 #--------------------- INITIALIZE PULSEBLASTER-------------------------
 PB_IPADDRESS= '169.254.8.2'
@@ -95,11 +113,12 @@ ljm.startInterval(intervalHandle, int(step_time_microseconds))
 #--------------------- DOWNLOADED PULSES STREAM TO PULSESTREAMER-------------------------
 
 
-do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 #do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 #do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
+rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
 
 
 #--------------LOOP SETUP----------------------------
@@ -117,11 +136,21 @@ columns = ['tau delay', 'labjack reading']
 # parameters for loop:
 loopAmount=delay_number_of_points
 
+if(fig_mode==3):
+    
 # copy of time delay array
 # Generate non-integer delays
-delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+    delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
 #print(delays)
 
+if(fig_mode==4):
+    
+# copy of time delay array
+# Generate non-integer delays
+    #delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+    delays = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
+    print("mw_pulse_lengths_ns=")
+    print(delays)
 #loop over and read the signal from the Labjack T7 and append the value to the intensity array
 
 
