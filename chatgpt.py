@@ -1,4 +1,5 @@
 def create_pattern_array(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
+
     pattern = [
         (tau_i_ns, 1), 
         ((tau_ref_ns - tau_i_ns), 0), 
