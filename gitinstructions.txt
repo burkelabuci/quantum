@@ -1,0 +1,27 @@
+Here's an instructions list on how to use all the git commands:
+
+IMPORTANT: Whenever you start and open your folder on VS code, make sure to type "git pull origin main", so that you can access all the changes that other members made on the
+main branch. Always type "git pull origin main" before you start editing your own files. 
+
+1) When you edit a file that's currently existing in your folder and save it, you need to commit your changes to the main github branch. The main branch is the one that stores
+all the code files that the rest of the github users can see 
+
+2) After you save your file, type "git status" in the terminal and it should mention all the code files that need to be committed under Untracked files:
+
+3) Now, you have to add the files that you've changed. In the terminal, type "git add <filename>"
+
+4) Now, after you added the changed file, you have to commit the file onto your local branch. The local branch contains the files that you own and the other members of the
+repository cannot access your local branch. In the terminal, type " git commit -m "enter a message explaining what your change was" "
+
+5) Now, you have to push the commits in your local branch to the main branch, so that the other members of the repository can access your changes. Type "git push origin main" in 
+your terminal. Now, your changes should be successfully pushed to the github.
+
+6) Type "git pull origin main" again in your terminal, and if it says "Already up to date" you are finished. 
+
+ADDING A NEW FILE:
+
+Follow the same steps above if you created a new file in the folder. After you create the file, just type git add <newfilename> and then follow steps 4-6. 
+
+
+
+
