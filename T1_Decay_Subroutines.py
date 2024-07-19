@@ -770,11 +770,11 @@ def create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, t
     
     pattern_1_subunit = [
         (tau_laser_ns_rounded, 1), 
-        ((tau_mw_ns_rounded+tau_padding_ns_rounded), 0)
+        ((tau_mw_ns_rounded+2*tau_padding_ns_rounded), 0)
     ]
     
     # there is still a large 0 here
-    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns_rounded+tau_mw_ns_rounded+tau_padding_ns_rounded)
+    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns_rounded+tau_mw_ns_rounded+2*tau_padding_ns_rounded)
     pattern_1_end=[
         (pattern_1_end_time_ns,0)
     ]
@@ -783,7 +783,7 @@ def create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, t
     
     pattern_2_subunit = [
         (tau_laser_ns_rounded, 1), 
-        (tau_mw_ns_rounded+tau_padding_ns_rounded, 0)
+        (tau_mw_ns_rounded+2*tau_padding_ns_rounded, 0)
     ]
     pattern_2_end = pattern_1_end
     
@@ -804,14 +804,14 @@ def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_
     tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
     
     pattern_1_subunit = [
-        (tau_laser_ns_rounded, 0), 
+        (tau_laser_ns_rounded+tau_padding_ns_rounded, 0), 
         (tau_mw_ns_rounded, 1),
         (tau_padding_ns_rounded,0)
     ]
     
        
     # there is still a large 0 here
-    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns_rounded+tau_mw_ns_rounded+tau_padding_ns_rounded)
+    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns_rounded+tau_mw_ns_rounded+2*tau_padding_ns_rounded)
     pattern_1_end=[
         (pattern_1_end_time_ns,0)
     ]
@@ -820,7 +820,7 @@ def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_
     pattern_1=pattern_1_subunit*n_repeat+pattern_1_end
     
     pattern_2_subunit = [
-        (tau_laser_ns_rounded, 0), 
+        (tau_laser_ns_rounded+, 0), 
         (tau_mw_ns_rounded, 0),
         (tau_padding_ns_rounded,0)
     ]
