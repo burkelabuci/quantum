@@ -73,3 +73,13 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_different_init_and_readout
 rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,ps)
 
 def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_delay_ns,number_of_cycles,ps: PulseStreamer):
+    
+    
+    
+tau_padding_ns=1e-6*1e9
+tau_padding_before_mw_ns=1e-6*1e9
+tau_padding_after_mw_ns=1e-6*1e9
+tau_padding_before_mw_ns,tau_padding_after_mw_ns
+tau_padding_before_mw_ns+tau_padding_after_mw_ns
+
+tau_padding_before_ns_rounded+tau_padding_after_ns_rounded

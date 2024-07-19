@@ -314,7 +314,7 @@ def create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
 
 
 
-def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_ns,tau_padding_ns,n_repeats,number_of_cycles,ps: PulseStreamer):
+def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps: PulseStreamer):
     # called by    
     # rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,ps)
     tau_mw_ns=mw_pulse_length_ns
@@ -354,7 +354,7 @@ def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     # n_repeats is 250 if fixed mw pulse
     # But under variable microwave pulse, ???
     #*********** THEN PULSE CYCLE LASER***********************
-    pulse_patt_laser = create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeats,number_of_cycles)
+    pulse_patt_laser = create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeats,number_of_cycles)
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
     #print("pulse_patt_laser sum=",sum_first_elements(pulse_patt_laser)/1e9)
     #print(pulse_patt_laser)
@@ -363,7 +363,7 @@ def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     #*********** THEN PULSE CYCLE MW***********************
 
     
-    pulse_patt_mw = create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeats,number_of_cycles)
+    pulse_patt_mw = create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeats,number_of_cycles)
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
     #print("pulse_patt_mw sum=",sum_first_elements(pulse_patt_mw)/1e9)
     #print(pulse_patt_mw)
@@ -614,7 +614,7 @@ def rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,t
 
 
 
-def rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps):
+def rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps):
          
 
     #mw_pulse_length_start_ns=0
@@ -637,7 +637,7 @@ def rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_nu
     #sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
 
 
-    sequences= [create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_ns,tau_padding_ns,n_repeats,number_of_cycles,ps)for mw_pulse_length_ns in mw_pulse_lengths_ns]
+    sequences= [create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)for mw_pulse_length_ns in mw_pulse_lengths_ns]
 
 
     # old one has integer value of delays
@@ -760,21 +760,26 @@ def create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
     pattern_array = pattern * n
     return pattern_array
 
-def create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeat,n):
+def create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeat,n):
 
     #round_to_nearest_8ns(value)
     tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
     tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
     tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
     tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
+    tau_padding_before_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
+    tau_padding_after_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
+    
+    
+    
     
     pattern_1_subunit = [
         (tau_laser_ns_rounded, 1), 
-        ((tau_mw_ns_rounded+2*tau_padding_ns_rounded), 0)
+        ((tau_padding_before_ns_rounded+tau_mw_ns_rounded+tau_padding_after_ns_rounded), 0)
     ]
     
     # there is still a large 0 here
-    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns_rounded+tau_mw_ns_rounded+2*tau_padding_ns_rounded)
+    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns_rounded+tau_mw_ns_rounded+tau_padding_before_ns_rounded+tau_padding_after_ns_rounded)
     pattern_1_end=[
         (pattern_1_end_time_ns,0)
     ]
@@ -783,7 +788,7 @@ def create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, t
     
     pattern_2_subunit = [
         (tau_laser_ns_rounded, 1), 
-        (tau_mw_ns_rounded+2*tau_padding_ns_rounded, 0)
+        (tau_mw_ns_rounded+tau_padding_before_ns_rounded+tau_padding_after_ns_rounded, 0)
     ]
     pattern_2_end = pattern_1_end
     
@@ -795,23 +800,25 @@ def create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, t
     return pattern_array
 
 
-def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeat,n):
+def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeat,n):
 
     #round_to_nearest_8ns(value)
     tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
     tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
     tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
     tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
+    tau_padding_before_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
+    tau_padding_after_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
     
     pattern_1_subunit = [
-        (tau_laser_ns_rounded+tau_padding_ns_rounded, 0), 
+        (tau_laser_ns_rounded+tau_padding_before_ns_rounded, 0), 
         (tau_mw_ns_rounded, 1),
-        (tau_padding_ns_rounded,0)
+        (tau_padding_after_ns_rounded,0)
     ]
     
        
     # there is still a large 0 here
-    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns_rounded+tau_mw_ns_rounded+2*tau_padding_ns_rounded)
+    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns_rounded+tau_mw_ns_rounded+tau_padding_before_ns_rounded+tau_padding_after_ns_rounded)
     pattern_1_end=[
         (pattern_1_end_time_ns,0)
     ]
@@ -820,9 +827,9 @@ def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_
     pattern_1=pattern_1_subunit*n_repeat+pattern_1_end
     
     pattern_2_subunit = [
-        (tau_laser_ns_rounded+, 0), 
+        (tau_laser_ns_rounded+tau_padding_before_ns_rounded, 0), 
         (tau_mw_ns_rounded, 0),
-        (tau_padding_ns_rounded,0)
+        (tau_padding_after_ns_rounded,0)
     ]
     pattern_2_end = pattern_1_end
     
