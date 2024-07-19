@@ -68,7 +68,7 @@ tau_padding_ns=1e-6*1e9
 n_repeats=250 # number of times pattern repeated within a cycle
 
 mw_pulse_length_start_ns=0.01e-6*1e9
-mw_pulse_length_stop_ns=500e-9*1e9
+mw_pulse_length_stop_ns=200e-9*1e9
 mw_pulse_length_number_of_points=100
 
 
@@ -191,8 +191,10 @@ if(fig_mode==3):
             print(sys.exc_info()[1])
             break
 
+num_points=len(delays)
+i=0
 if(fig_mode==4):
-    print("Tau(ns), result, time")
+    print("Point, Tau(ns), result, time")
     for sequence, tau in zip(sequences, delays):
     # Your code here
         #print(f"Sequence: {sequence}, Tau: {tau}")
@@ -202,10 +204,11 @@ if(fig_mode==4):
         ps.startNow()
         time.sleep(2)
         results = ljm.eReadNames(handle, numFrames, names)
-        pairs.append((tau,abs(results[0])))  # Append the tuple to the list
+        pairs.append((1e-9*tau,abs(results[0])))  # Append the tuple to the list
         x=abs(results[0])
-        print(int(tau),f"{x:.3f}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
+        print(i,int(tau),f"{x:.3f}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
         #print(tau,abs(results[0]))
+        i=i+1
         ljm.waitForNextInterval(intervalHandle)
 
     

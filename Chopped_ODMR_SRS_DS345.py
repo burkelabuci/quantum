@@ -30,10 +30,11 @@ import os
 #Parameters for the microwave:
 start_frequency = 2400 #in MHz
 stop_frequency = 3200 #in MHz
+
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(300) #in milliseconds
+step_time = int(100) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
-base_folder = r"C:\Users\BurkeLab\Desktop\071824" # Specify the base folder where you want to save the files
+base_folder = r"C:\Users\BurkeLab\Desktop\071924" # Specify the base folder where you want to save the files
 
 #arrays that will be used for plot
 frequencies= []
