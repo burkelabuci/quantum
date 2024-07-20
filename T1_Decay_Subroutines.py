@@ -766,7 +766,7 @@ def create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, t
     tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
     tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
     tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
-    tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
+    #tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
     tau_padding_before_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
     tau_padding_after_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
     
@@ -806,7 +806,7 @@ def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_
     tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
     tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
     tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
-    tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
+    #tau_padding_ns_rounded=round_to_nearest_8ns(tau_padding_ns)
     tau_padding_before_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
     tau_padding_after_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
     
