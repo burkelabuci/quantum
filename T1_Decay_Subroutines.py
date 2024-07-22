@@ -65,7 +65,7 @@ def create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps
     return
 
 
-def create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_ns,n_repeats,ps: PulseStreamer):
+def create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps: PulseStreamer):
     # Creates patter in fig 4 of teaching paper
     # ps is the pulsestreamer object
     # n_repeats is how long many repeats per cycle
@@ -81,11 +81,16 @@ def create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,t
     # Set channel 1 as the laser pulse sequence (pulse duration in nanoseconds)
     # Fix 8 ns rounding:
 #    seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),((tau_i_ns), 1),((tau_delay_ns),0),((tau_i_ns), 1), ((tau_ref_ns-2*tau_i_ns-tau_delay_ns), 0)])
-    pulse_patt_decay_laser = create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeats,1)
+    
+    pulse_patt_decay_laser= create_fig_4_laser_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeats,1)
+
+
+
+
     seq.setDigital(1,pulse_patt_decay_laser) 
     
     # Set channel 2 as the microwave pulse sequence (pulse duration in nanoseconds)
-    pulse_patt_decay_mw = create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_ns, n_repeats,1)
+    pulse_patt_decay_mw = create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeats,1)
     seq.setDigital(2,pulse_patt_decay_mw) 
  
     ps.stream(seq)  # runs forever , but returns program
