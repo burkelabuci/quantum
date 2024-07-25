@@ -286,11 +286,11 @@ def create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     #print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref))
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    print("---------------------------------------------------")
-    print("tau_delay_ns=",tau_delay_ns)
-    print("pulse_patt_ref=")
-    print(pulse_patt_ref)
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
+    #print("tau_delay_ns=",tau_delay_ns)
+    #print("pulse_patt_ref=")
+    #print(pulse_patt_ref)
+    #print("---------------------------------------------------")
     seq.setDigital(channel_number_ref, pulse_patt_ref)
 
 
@@ -307,11 +307,11 @@ def create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    print("---------------------------------------------------")
-    print("tau_delay_ns=",tau_delay_ns)
-    print("pulse_patt_decay=")
-    print(pulse_patt_decay)
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
+    #print("tau_delay_ns=",tau_delay_ns)
+    #print("pulse_patt_decay=")
+    #print(pulse_patt_decay)
+    #print("---------------------------------------------------")
     #print(pulse_patt_decay)
     seq.setDigital(channel_number_pulse, pulse_patt_decay)
 
@@ -404,11 +404,11 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_different_init_and_readout
     #print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref))
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    print("---------------------------------------------------")
-    print("tau_delay_ns=",tau_delay_ns)
-    print("pulse_patt_ref=")
-    print(pulse_patt_ref)
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
+    #print("tau_delay_ns=",tau_delay_ns)
+    #print("pulse_patt_ref=")
+    #print(pulse_patt_ref)
+    #print("---------------------------------------------------")
     seq.setDigital(channel_number_ref, pulse_patt_ref)
 
 
@@ -427,11 +427,11 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_different_init_and_readout
     
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    print("---------------------------------------------------")
-    print("tau_delay_ns=",tau_delay_ns)
-    print("pulse_patt_decay=")
-    print(pulse_patt_decay)
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
+    #print("tau_delay_ns=",tau_delay_ns)
+    #print("pulse_patt_decay=")
+    #print(pulse_patt_decay)
+    #print("---------------------------------------------------")
     #print(pulse_patt_decay)
     seq.setDigital(channel_number_pulse, pulse_patt_decay)
 
@@ -464,11 +464,11 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_no_init_pulse(channel_numb
     #print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref))
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    print("---------------------------------------------------")
-    print("tau_delay_ns=",tau_delay_ns)
-    print("pulse_patt_ref=")
-    print(pulse_patt_ref)
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
+    #print("tau_delay_ns=",tau_delay_ns)
+    #print("pulse_patt_ref=")
+    #print(pulse_patt_ref)
+    #print("---------------------------------------------------")
     seq.setDigital(channel_number_ref, pulse_patt_ref)
 
 
@@ -486,11 +486,11 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_no_init_pulse(channel_numb
     
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    print("---------------------------------------------------")
-    print("tau_delay_ns=",tau_delay_ns)
-    print("pulse_patt_decay=")
-    print(pulse_patt_decay)
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
+    #print("tau_delay_ns=",tau_delay_ns)
+    #print("pulse_patt_decay=")
+    #print(pulse_patt_decay)
+    #print("---------------------------------------------------")
     #print(pulse_patt_decay)
     seq.setDigital(channel_number_pulse, pulse_patt_decay)
 
@@ -524,11 +524,11 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_no_init_pulse(channel_numb
     #print("pulse_patt_ref sum=",sum_first_elements(pulse_patt_ref))
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    print("---------------------------------------------------")
-    print("tau_delay_ns=",tau_delay_ns)
-    print("pulse_patt_ref=")
-    print(pulse_patt_ref)
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
+    #print("tau_delay_ns=",tau_delay_ns)
+    #print("pulse_patt_ref=")
+    #print(pulse_patt_ref)
+    #print("---------------------------------------------------")
     seq.setDigital(channel_number_ref, pulse_patt_ref)
 
 
@@ -546,11 +546,11 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_no_init_pulse(channel_numb
     
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    print("---------------------------------------------------")
-    print("tau_delay_ns=",tau_delay_ns)
-    print("pulse_patt_decay=")
-    print(pulse_patt_decay)
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
+    #print("tau_delay_ns=",tau_delay_ns)
+    #print("pulse_patt_decay=")
+    #print(pulse_patt_decay)
+    #print("---------------------------------------------------")
     #print(pulse_patt_decay)
     seq.setDigital(channel_number_pulse, pulse_patt_decay)
 
