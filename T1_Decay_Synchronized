@@ -1,6 +1,6 @@
 # Program name T1_Decay.py
 # 6/14/2024
-# Author Minghao
+# Author Minghao + Peter Burke
 # From reference paper:
 # Sewani, Vikas K., Hyma H. Vallabhapurapu, Yang Yang, Hannes R. Firgau, Chris Adambukulam, 
 # Brett C. Johnson, Jarryd J. Pla, and Arne Laucht. 
@@ -10,6 +10,81 @@
 
 # This program creates Ch0 and Ch1 output waveform of Pulseblaster model 8/2 as Fig 3 of reference
 # at IP address PB_IPADDRESS
+
+#----------------INSTRUCTIONS------------------------------------
+#To generate Fig 3 of teaching paper:
+
+#1. Set up optics to get ODMR to make sure everything is working right.
+#2. Set up pulse blaster and photocurrent to lock in. The scale of lock in may need to be adjusted for T1.
+#3. Run:
+#T1_Decay_Synchronized.py
+
+# This generates every single pulse and downloads it to the pulseblaser.
+# The delay gets larger every number_of_cycles, so you vary the delay.
+# But the sequence is one giant sequence precomputed.
+#The parameters need to be adjusted as needed:
+
+# fig_mode=3 for figure 3.
+# tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4.
+# number_of_cycles=33 # default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4
+# Since the reference rate is 33 Hz, the pulseblaster will create 33 cycles for each delay, giving one second to take the data.
+# If you want longer per delay point, increase 33 cycles. E.g. 330 Hz will give 10 seconds of time for each delay point.
+
+# Uncomment one of these three:
+#do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+# Keep the Rabi lines commented out
+
+# the no init creates a readout pulse with no initialization pulse, so should be independent of tdelay.
+# in the teaching paper the init and readout pulse are both 5 microseconds, but you can have different readout pulse width if you want
+#----------------INSTRUCTIONS------------------------------------
+#To generate Fig 4b,c,d of teaching paper:
+
+# This is just ODMR where the lockin output is measured as you step the frequency.
+# The program Chopped_ODMR_SRS_DS345.py can be used to do this sweep.
+# You just have to adjust the frequency range, step, and time per point.
+# To set the pulsing sequence up as in Fig 4a, you need to download the correct pulse sequence into the pulseblaster and set it to run indefinitely.
+# Do this with:
+# callpulseblasterhelperfunctions.py
+# That calls :
+# create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
+# You have to input the parameters tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats
+# Note there is a function version in T1_Decay_Subroutines.py called
+# def chopped_odmr_srs_ds345(start_frequency=2670, stop_frequency=2690, step_size=1, step_time=1000, base_folder=r"C:\Users\BurkeLab\Desktop\072624"):
+# It does not plot, just saves the file.
+
+#----------------INSTRUCTIONS------------------------------------
+#To generate Fig 4e of teaching paper: (Rabi oscillations)
+
+#1. Set up optics to get ODMR to make sure everything is working right.
+#2. Set up pulse blaster and photocurrent to lock in. The scale of lock in may need to be adjusted for T1.
+#3. Run:
+#T1_Decay_Synchronized.py
+
+# This generates every single pulse and downloads it to the pulseblaser.
+# But for each delay, it downloads a new pulse sequence. (Sadly the memory is too small to download the pulses for all delays)
+#The parameters need to be adjusted as needed:
+
+# fig_mode=4 for figure 4.
+# tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4.
+# number_of_cycles=200 # default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4
+# Since the reference rate is 200 Hz, the pulseblaster will create 200 cycles for each delay, giving one second to take the data.
+# If you want longer per delay point, increase 200 cycles. E.g. 2000 Hz will give 10 seconds of time for each delay point.
+
+# Comment out :
+#do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+# (The Rabi function tried to download one giant sequence but it was too big for the pulseblaster brain to handle)
+
+# Uncommment:
+# sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+# This generates a 1d array of sequences, each one for a different delay.
+
+
+
+
 
 import numpy as np
 import pandas as pd

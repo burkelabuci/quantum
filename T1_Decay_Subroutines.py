@@ -963,27 +963,27 @@ def chopped_odmr_srs_ds345(start_frequency=2670, stop_frequency=2690, step_size=
     intervalHandle = 1
 
     synth = SynthHD("COM3")
-    print("\t \t Set Parameters \n \n")
+    #print("\t \t Set Parameters \n \n")
 
     frequencies = [i * 1e6 for i in range(start_frequency, stop_frequency, step_size)]
     synth.write("sweep_freq_low", start_frequency)
-    print("Starting sweeping")
+    #print("Starting sweeping")
     synth.write("sweep_freq_high", stop_frequency)
-    print("Frequency high set")
+    #print("Frequency high set")
     synth.write("sweep_freq_step", step_size)
-    print("Frequency step set")
+    #print("Frequency step set")
     synth.write("sweep_time_step", step_time)
-    print("Frequency time set")
+    #print("Frequency time set")
 
     current_time = datetime.now()
     print("Current time:", current_time.strftime("%Y-%m-%d %H:%M:%S"))
 
     number_of_elements = len(frequencies)
-    print("Number of elements in frequencies:", number_of_elements)
+    #print("Number of elements in frequencies:", number_of_elements)
     time_to_complete_seconds = number_of_elements * step_time * 1e-3
     completion_time = current_time + timedelta(seconds=time_to_complete_seconds)
     print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"))
-    print("Starting collecting")
+    #print("Starting collecting")
 
     revised_steptime = step_time * 1000
     ljm.startInterval(intervalHandle, revised_steptime)
@@ -991,7 +991,7 @@ def chopped_odmr_srs_ds345(start_frequency=2670, stop_frequency=2690, step_size=
     intensities = []
 
     synth.write("sweep_single", True)
-    print("Actual sweep once true")
+    #print("Actual sweep once true")
 
     j = 0
     while True:
@@ -1023,5 +1023,10 @@ def chopped_odmr_srs_ds345(start_frequency=2670, stop_frequency=2690, step_size=
     #plt.ylabel("labjack voltage (V)")
 
     #plt.show()
+    
+    # Release the COM port and close LabJack handle
+    synth.close()
+    ljm.close(handle)
+    #print("COM port released and LabJack handle closed.")
 
 
