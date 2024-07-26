@@ -21,20 +21,20 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from windfreak import SynthHD, synth_hd
-
+from datetime import datetime, timedelta
 import time
 from datetime import datetime
 import os
 
 
 #Parameters for the microwave:
-start_frequency = 2400 #in MHz
+start_frequency = 2600 #in MHz
 stop_frequency = 3100 #in MHz
 
 step_size = int(1) # specing between each frequency point in MHz
 step_time = int(300) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
-base_folder = r"C:\Users\BurkeLab\Desktop\072524" # Specify the base folder where you want to save the files
+base_folder = r"C:\Users\BurkeLab\Desktop\072624" # Specify the base folder where you want to save the files
 
 #arrays that will be used for plot
 frequencies= []
@@ -125,6 +125,16 @@ print("Frequency step set")
 synth.write("sweep_time_step", step_time)
 print("Frequency time set")
 
+# Get the current time
+current_time = datetime.now()
+print("Current time:", current_time.strftime("%Y-%m-%d %H:%M:%S"))
+
+
+number_of_elements = len(frequencies)
+print("Number of elements in frequencies:", number_of_elements)
+time_to_complete_seconds=number_of_elements*step_time*1e-3
+completion_time = current_time + timedelta(seconds=time_to_complete_seconds)
+print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"))
 print("Starting collecting")
 
 revised_steptime= step_time*1000
