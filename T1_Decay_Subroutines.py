@@ -17,7 +17,15 @@ from labjack import ljm
 from pulsestreamer import PulseStreamer
 import keyboard
 import time 
-
+import os
+from labjack import ljm
+import sys
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from windfreak import SynthHD
+from datetime import datetime, timedelta
+import time
 
 def square_number(num):
     """
@@ -910,3 +918,110 @@ def round_to_nearest_8ns(value_in_ns):
      # Function to round each delay to the nearest multiple of 8 ns
     ns_per_step = 8  # 8 nanoseconds
     return int( round(value_in_ns / ns_per_step) * ns_per_step   )
+
+
+
+def chopped_odmr_srs_ds345(start_frequency=2670, stop_frequency=2690, step_size=1, step_time=1000, base_folder=r"C:\Users\BurkeLab\Desktop\072624"):
+    # Peter Burke 7/26/2024
+    # ChatGPT made this function from the python file chopped_odmr_srs_ds345.py
+    # Peter Burke modified it
+    # Example of how to call the function
+    #chopped_odmr_srs_ds345()
+    #You can call chopped_odmr_srs_ds345() with your desired parameters, and it will execute the same logic as the original script. If you need to change the parameters like #start_frequency, stop_frequency, etc., you can pass them as arguments to the function.
+    def generate_unique_filename(base_folder):
+        os.makedirs(base_folder, exist_ok=True)
+        now = datetime.now()
+        month = now.strftime('%m')
+        day = now.strftime('%d')
+        year = now.strftime('%y')
+        existing_files = os.listdir(base_folder)
+        file_number = 1
+        while True:
+            filename = f"{month}{day}{year}{file_number:04d}"
+            if f"{filename}.csv" not in existing_files:
+                break
+            file_number += 1
+        filepath = os.path.join(base_folder, f"{filename}.csv")
+        return filepath
+
+    plotname = generate_unique_filename(base_folder)
+    print(f"Unique filename: {plotname}")
+
+    #print("\n \t \t Qubit initialization Process; ODMR Single Plot \n \n")
+    #print("\t \t Initializing Systems \n \n")
+
+    handle = ljm.openS("ANY", "ANY")
+
+    names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US",
+             "AIN1_NEGATIVE_CH", "AIN1_RANGE", "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
+    aValues = [199, 10.0, 0, 0, 199, 10.0, 0, 0]
+    num_Frames = len(names)
+    ljm.eWriteNames(handle, num_Frames, names, aValues)
+
+    numFrames = 2
+    names = ["AIN0", "DAC0"]
+    intervalHandle = 1
+
+    synth = SynthHD("COM3")
+    print("\t \t Set Parameters \n \n")
+
+    frequencies = [i * 1e6 for i in range(start_frequency, stop_frequency, step_size)]
+    synth.write("sweep_freq_low", start_frequency)
+    print("Starting sweeping")
+    synth.write("sweep_freq_high", stop_frequency)
+    print("Frequency high set")
+    synth.write("sweep_freq_step", step_size)
+    print("Frequency step set")
+    synth.write("sweep_time_step", step_time)
+    print("Frequency time set")
+
+    current_time = datetime.now()
+    print("Current time:", current_time.strftime("%Y-%m-%d %H:%M:%S"))
+
+    number_of_elements = len(frequencies)
+    print("Number of elements in frequencies:", number_of_elements)
+    time_to_complete_seconds = number_of_elements * step_time * 1e-3
+    completion_time = current_time + timedelta(seconds=time_to_complete_seconds)
+    print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"))
+    print("Starting collecting")
+
+    revised_steptime = step_time * 1000
+    ljm.startInterval(intervalHandle, revised_steptime)
+
+    intensities = []
+
+    synth.write("sweep_single", True)
+    print("Actual sweep once true")
+
+    j = 0
+    while True:
+        try:
+            results = ljm.eReadNames(handle, numFrames, names)
+            intensities.append(abs(results[0]))
+            ljm.waitForNextInterval(intervalHandle)
+            if stop_frequency - start_frequency != "infinite":
+                j += 1
+                if j >= stop_frequency - start_frequency:
+                    break
+        except KeyboardInterrupt:
+            break
+        except Exception:
+            print(sys.exc_info()[1])
+            break
+
+    saved_dict = {
+        "frequencies (Hz)": frequencies,
+        "Labjack voltage (V)": intensities
+    }
+
+    df = pd.DataFrame(saved_dict)
+    csv_filepath = plotname
+    df.to_csv(csv_filepath, sep="\t")
+
+    #plt.plot(frequencies, intensities)
+    #plt.xlabel("Microwave Frequency (Hz)")
+    #plt.ylabel("labjack voltage (V)")
+
+    #plt.show()
+
+

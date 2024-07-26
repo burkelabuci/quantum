@@ -28,11 +28,11 @@ import os
 
 
 #Parameters for the microwave:
-start_frequency = 2600 #in MHz
-stop_frequency = 3100 #in MHz
+start_frequency = 2670 #in MHz
+stop_frequency = 2690 #in MHz
 
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(300) #in milliseconds
+step_time = int(1000) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
 base_folder = r"C:\Users\BurkeLab\Desktop\072624" # Specify the base folder where you want to save the files
 

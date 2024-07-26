@@ -1,7 +1,6 @@
-# PulseBlaster test.py
-# Peter Burke 7/12/2024
-# calls pulse blaster helper functions
-# used to debut
+# ODMRvsTauMicrowave.py
+# Peter Burke 7/26/2024
+# Measures ODMR at different microwave pulse times
 
 import numpy as np
 import pandas as pd
@@ -62,12 +61,7 @@ print(f"n_repeats: {n_repeats}")
 
 create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
 
-# Count down from 10
-#print("Countdown....")
-#for i in range(10, 0, -1):
-#    print(i)
-#    time.sleep(1)
-#print("BLASTOFF!")
+
 
 print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 ps.startNow()
