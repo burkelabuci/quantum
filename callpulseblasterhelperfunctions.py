@@ -42,7 +42,7 @@ tau_delay_ns=1e-3*1e9
 tau_laser_ns=5e-6*1e9
 tau_mw_ns=5e-6*1e9
 tau_padding_ns=1e-6*1e9
-n_repeats=240 # 250  but with padding must be less
+n_repeats=245 # 250  but with padding must be less
 tau_padding_before_mw_ns=100e-9*1e9
 tau_padding_after_mw_ns=100e-9*1e9
 
