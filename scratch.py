@@ -1,85 +1,59 @@
-# scratch code temporary 
+# ODMRvsTauMicrowave.py
+# Peter Burke 7/26/2024
+# Measures ODMR at different microwave pulse times
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from labjack import ljm
+from pulsestreamer import PulseStreamer
 from pulsestreamer import *
 import keyboard
 import time 
-import sys
-from windfreak import SynthHD, synth_hd
-from datetime import datetime
-import os
-import csv
-from main import *
 from T1_Decay_Subroutines import *
+from T1_Decay_parameters import *
+
+# Parameters
+PB_IPADDRESS = '169.254.8.2'
+
+ps = PulseStreamer(PB_IPADDRESS)
+ps.setTrigger(TriggerStart.SOFTWARE)
 
 #--------------------- PARAMETERS-------------------------
-tau_ref_ns=15e-3*1e9
-tau_i_ns=5e-6*1e9 # laser initialization/readout pulse width
-number_of_cycles=330 # default 33; sets how long each pulse pattern is for a given delay
-channel_number_ref=0
-channel_number_pulse=1
-delay_start_s=3e-3
-delay_stop_s=0.01e-3
-delay_number_of_points=100
-step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
-step_time_microseconds=step_time*1e6
+tau_ref_ns = 2.5e-3 * 1e9  # 15 ms for fig 3, 2.5 ms for fig 4
+tau_i_ns = 5e-6 * 1e9  # laser initialization/readout pulse width
+number_of_cycles = 200  # default 33 fig 3, 200 fig 4; sets how long each pulse pattern is for a given delay
+channel_number_ref = 0
+channel_number_pulse = 1
+delay_start_s = 100e-6
+delay_stop_s = 1e-6
+delay_number_of_points = 100
+step_time = number_of_cycles * 2 * tau_ref_ns * 1e-9  # in seconds
+step_time_microseconds = step_time * 1e6
+tau_delay_ns = 1e-3 * 1e9
 
-#--------------------- SCRATCH CODE-------------------------
+# for Fig 4
+tau_laser_ns = 5e-6 * 1e9
+tau_padding_ns = 1e-6 * 1e9
+n_repeats = 245  # 250 but with padding must be less
+tau_padding_before_mw_ns = 100e-9 * 1e9
+tau_padding_after_mw_ns = 100e-9 * 1e9
 
-do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-#do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+# List of tau_mw_ns values to iterate over
+tau_mw_ns_values = np.linspace(1e-6 * 1e9, 10e-6 * 1e9, 10)  # Example range from 1 us to 10 us
 
-do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps):
+for tau_mw_ns in tau_mw_ns_values:
+    print("calling this function")
+    print(f"tau_ref_ns: {tau_ref_ns}")
+    print(f"tau_laser_ns: {tau_laser_ns}")
+    print(f"tau_mw_ns: {tau_mw_ns}")
+    print(f"tau_padding_before_mw_ns: {tau_padding_before_mw_ns}")
+    print(f"tau_padding_after_mw_ns: {tau_padding_after_mw_ns}")
+    print(f"n_repeats: {n_repeats}")
 
-    # tau_readout_ns is the readout pulse width
-    # tau_i_ns is the intitialization pulse width
-    
-    
+    create_fig4_teachingpaper_pulse_sequence(tau_ref_ns, tau_laser_ns, tau_mw_ns, tau_padding_before_mw_ns, tau_padding_after_mw_ns, n_repeats, ps)
 
-    # Create sequences using the non-integer delays
-    sequences = [create_fig3_teachingpaper_pulse_sequence_repeated(channel_number_ref, channel_number_pulse, tau_ref_ns, tau_i_ns, delay*1e9, number_of_cycles, ps) for delay in delays]
-
-
-
-def create_fig3_teachingpaper_pulse_sequence_repeated_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_delay_ns,number_of_cycles,ps: PulseStreamer):
-    # Creates patter in fig 3 of teaching paper
-    # ps is the pulsestreamer object
-    # duration is how long the stream runs for in seconds
-
- pulse_patt_decay = create_fig3_teachingpaper_pulse_sequence_repeated_different_init_and_readout_pulsewidth(tau_ref_ns, tau_i_ns,tau_readout_ns, tau_delay_ns, number_of_cycles)
-    
-
-    pulse_patt_decay = create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
-    
-    create_pattern_array_rounded_to_8_ns_different_init_and_readout_pulsewidth
-    
-    
-    #pulse_patt_decay = create_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
-    create_fig3_teachingpaper_pulse_sequence
-    pulse_patt_decay = create_fig3_teachingpaper_pulse_sequence_different_init_and_readout_pulsewidth(tau_ref_ns, tau_i_ns,tau_readout_ns, tau_delay_ns, number_of_cycles)
-    
-    
-    create_pattern_array_rounded_to_8_ns
-    
-    
-    
-    
-
-
-
-rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,ps)
-
-def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_delay_ns,number_of_cycles,ps: PulseStreamer):
-    
-    
-    
-tau_padding_ns=1e-6*1e9
-tau_padding_before_mw_ns=1e-6*1e9
-tau_padding_after_mw_ns=1e-6*1e9
-tau_padding_before_mw_ns,tau_padding_after_mw_ns
-tau_padding_before_mw_ns+tau_padding_after_mw_ns
-
-tau_padding_before_ns_rounded+tau_padding_after_ns_rounded
+    print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    ps.startNow()
+    time.sleep(step_time)  # Adding delay to ensure pulse streamer completes its sequence before the next iteration

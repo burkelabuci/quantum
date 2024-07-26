@@ -45,28 +45,39 @@ n_repeats=245 # 250  but with padding must be less
 tau_padding_before_mw_ns=100e-9*1e9
 tau_padding_after_mw_ns=100e-9*1e9
 
-#create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps)
-#create_fig3_teachingpaper_pulse_sequence_no_init_pulse(tau_ref_ns,tau_i_ns,tau_delay_ns,ps)
-
-
-print("calling this function")
-print(f"tau_ref_ns: {tau_ref_ns}")
-print(f"tau_laser_ns: {tau_laser_ns}")
-print(f"tau_mw_ns: {tau_mw_ns}")
-print(f"tau_padding_before_mw_ns: {tau_padding_before_mw_ns}")
-print(f"tau_padding_after_mw_ns: {tau_padding_after_mw_ns}")
-print(f"n_repeats: {n_repeats}")
-
-
-
-create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
-
-
-
-print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-ps.startNow()
 
 
 
 
+# Parameters for tau_mw_ns values
+tau_mw_ns_start = 1e-6 * 1e9  # Start value for tau_mw_ns
+tau_mw_ns_stop = 5e-6 * 1e9  # Stop value for tau_mw_ns
+tau_mw_ns_points = 5  # Number of points for tau_mw_ns
 
+# Calculate tau_mw_ns values
+tau_mw_ns_values = np.linspace(tau_mw_ns_start, tau_mw_ns_stop, tau_mw_ns_points)
+
+print(tau_mw_ns_values)
+
+
+
+pulse_blaster_settle_time=1 # seconds to wait after new pulse blaster time
+
+
+
+for tau_mw_ns in tau_mw_ns_values:
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"Current time: {current_time}")
+    print("calling this function")
+    print(f"tau_ref_ns: {tau_ref_ns}")
+    print(f"tau_laser_ns: {tau_laser_ns}")
+    print(f"tau_mw_ns: {tau_mw_ns}")
+    print(f"tau_padding_before_mw_ns: {tau_padding_before_mw_ns}")
+    print(f"tau_padding_after_mw_ns: {tau_padding_after_mw_ns}")
+    print(f"n_repeats: {n_repeats}")
+
+    create_fig4_teachingpaper_pulse_sequence(tau_ref_ns, tau_laser_ns, tau_mw_ns, tau_padding_before_mw_ns, tau_padding_after_mw_ns, n_repeats, ps)
+
+    print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    ps.startNow()
+    time.sleep(pulse_blaster_settle_time)  # Adding delay to ensure pulse streamer completes its sequence before the next iteration
