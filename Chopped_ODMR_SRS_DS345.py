@@ -28,8 +28,8 @@ import os
 
 
 #Parameters for the microwave:
-start_frequency = 2670 #in MHz
-stop_frequency = 2690 #in MHz
+start_frequency = 2800 #in MHz
+stop_frequency = 3000 #in MHz
 
 step_size = int(1) # specing between each frequency point in MHz
 step_time = int(1000) #in milliseconds

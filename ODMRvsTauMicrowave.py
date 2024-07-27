@@ -68,10 +68,10 @@ tau_padding_after_mw_ns=100e-9*1e9
 
 
 # Parameters for chopped ODMR:
-start_frequency = 2670 #in MHz
-stop_frequency = 2690 #in MHz
+start_frequency = 2600 #in MHz
+stop_frequency = 3100 #in MHz
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(1000) #in milliseconds
+step_time = int(300) #in milliseconds
 base_folder = r"C:\Users\BurkeLab\Desktop\072624" # Specify the base folder where you want to save the files
 
 
