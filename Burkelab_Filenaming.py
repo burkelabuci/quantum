@@ -9,8 +9,9 @@
 import os
 from datetime import datetime
 
-
+#Define the path that you would like to generate the folder
 default_path = r"C:\Users\BurkeLab\Desktop"
+
 def create_folder_and_generate_filename(base_path=default_path):
     # Get today's date in mmddyy format
     today_date = datetime.now().strftime("%m%d%y")
