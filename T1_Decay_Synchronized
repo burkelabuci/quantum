@@ -139,14 +139,16 @@ tau_laser_ns=5e-6*1e9
 #number_of_cycles=200
 tau_mw_ns=5e-6*1e9
 tau_padding_ns=1e-6*1e9
-tau_padding_before_mw_ns=100e-9*1e9
-tau_padding_after_mw_ns=100e-9*1e9
+tau_padding_before_mw_ns=1000e-9*1e9
+tau_padding_after_mw_ns=1000e-9*1e9
 #n_repeats=250 # number of times pattern repeated within a cycle
-n_repeats=245 # number of times pattern repeated within a cycle
+n_repeats=200 # number of times pattern repeated within a cycle
 
 mw_pulse_length_start_ns=0.01e-6*1e9
-mw_pulse_length_stop_ns=5000e-9*1e9
-mw_pulse_length_number_of_points=50
+mw_pulse_length_stop_ns=100e-9*1e9
+mw_pulse_length_number_of_points=25
+
+rabi_delay_s=6 # delay after setting new microwave pulse time to reading LIA output
 
 
 #--------------------- INITIALIZE PULSEBLASTER-------------------------
@@ -285,6 +287,19 @@ if(fig_mode==3):
 num_points=len(delays)
 i=0
 if(fig_mode==4):
+
+
+    # Get the current time
+    current_time = datetime.now()
+    print("Current time:", current_time.strftime("%Y-%m-%d %H:%M:%S"))
+    time_to_complete_seconds=(step_time+rabi_delay_s)*mw_pulse_length_number_of_points
+    completion_time = current_time + timedelta(seconds=time_to_complete_seconds)
+    print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"))
+    print("Starting collecting")
+
+
+
+
     print("Point, Tau(ns), result, time")
     for sequence, tau in zip(sequences, delays):
     # Your code here
@@ -293,8 +308,8 @@ if(fig_mode==4):
         #print("Tau, Current Time:",tau, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         ps.stream(sequence)
         ps.startNow()
-        print("starting at",datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        time.sleep(6)
+        #print("starting at",datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        time.sleep(rabi_delay_s)
         results = ljm.eReadNames(handle, numFrames, names)
         pairs.append((1e-9*tau,abs(results[0])))  # Append the tuple to the list
         x=abs(results[0])
