@@ -62,9 +62,9 @@ tau_delay_ns=1e-3*1e9
 tau_laser_ns=5e-6*1e9
 tau_mw_ns=1e-6*1e9
 tau_padding_ns=1e-6*1e9
-n_repeats=245 # 250  but with padding must be less
-tau_padding_before_mw_ns=100e-9*1e9
-tau_padding_after_mw_ns=100e-9*1e9
+n_repeats=200 # 250  but with padding must be less
+tau_padding_before_mw_ns=1000e-9*1e9
+tau_padding_after_mw_ns=1000e-9*1e9
 
 
 # Parameters for chopped ODMR:
@@ -72,7 +72,7 @@ start_frequency = 2600 #in MHz
 stop_frequency = 3100 #in MHz
 step_size = int(1) # specing between each frequency point in MHz
 step_time = int(300) #in milliseconds
-base_folder = r"C:\Users\BurkeLab\Desktop\072624" # Specify the base folder where you want to save the files
+base_folder = r"C:\Users\BurkeLab\Desktop\081424" # Specify the base folder where you want to save the files
 
 
 
@@ -80,8 +80,8 @@ base_folder = r"C:\Users\BurkeLab\Desktop\072624" # Specify the base folder wher
 
 # Parameters for tau_mw_ns values
 tau_mw_ns_start = 0.01e-6 * 1e9  # Start value for tau_mw_ns
-tau_mw_ns_stop = 5e-6 * 1e9  # Stop value for tau_mw_ns
-tau_mw_ns_points = 10  # Number of points for tau_mw_ns
+tau_mw_ns_stop = 500e-9 * 1e9  # Stop value for tau_mw_ns
+tau_mw_ns_points = 24  # Number of points for tau_mw_ns
 
 # Calculate tau_mw_ns values
 tau_mw_ns_values = np.linspace(tau_mw_ns_start, tau_mw_ns_stop, tau_mw_ns_points)
