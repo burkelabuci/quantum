@@ -84,6 +84,16 @@
 
 
 
+#----------------INSTRUCTIONS------------------------------------
+#To generate Fig 5 of teaching paper: (Hahn echo)
+# (Note this is IN PROGRESS starting 8/16/2024, PJB)
+
+# configure parameters below that pertain to fig 5
+# fig_mode=5 for figure 5.
+# uncomment  sequences=Hahn_many_sequences(...
+# 
+
+#---------------------------------------------------------------
 
 
 import numpy as np
@@ -111,47 +121,58 @@ plotname = generate_unique_filename(base_folder)# Generate unique filename with 
 
 #--------------------- PARAMETERS-------------------------
 
-# Fig 3 only
-tau_i_ns=5e-6*1e9 # laser initialization pulse width
-#tau_readout_ns=tau_i_ns # laser readout pulse width
-tau_readout_ns=5e-6*1e9 # laser readout pulse width
-delay_start_s=3e-3
-delay_stop_s=0.01e-3
-delay_number_of_points=50
-
-# for both fig 3 and fig 4
-fig_mode=4 # 3 for figure 3 , 4 for figure 4
-
-tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4.
-number_of_cycles=200 # default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4
-# for fig 4 200 Hz default, so want 200 cycles if 1 second between each point
-step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
-step_time_microseconds=step_time*1e6
-
+# for both fig 3 and fig 4 and fig 5
+fig_mode=5 # 3 for figure 3 , 4 for figure 4, 5 for figure 5
 channel_number_ref=0
 channel_number_pulse=1
 channel_number_laser_pulse=1 # same thing as channel_number_pulse
 channel_number_mw_pulse=2
+channel_number_mw_phaseshifted_pulse=3
+
+tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4. and 5
+number_of_cycles=200 # number of reference cycles for each data point
+# default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4, 5
+# for fig 4 200 Hz default, so want 200 cycles if 1 second between each point
+step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds, how long each data point has pulses going
+step_time_microseconds=step_time*1e6
+
+# Fig 3 only
+tau_i_ns=5e-6*1e9 # laser initialization pulse width
+#tau_readout_ns=tau_i_ns # laser readout pulse width
+tau_readout_ns=5e-6*1e9 # laser readout pulse width
+# Fig 3 will vary delay between laser init and laser readout pulse between delay_start_s and delay_stop_s and measure the LIA at each point.
+delay_start_s=3e-3
+delay_stop_s=0.01e-3
+delay_number_of_points=50
 
 
-# for Fig 4
-tau_laser_ns=5e-6*1e9
-#number_of_cycles=200
-tau_mw_ns=5e-6*1e9
-tau_padding_ns=1e-6*1e9
-tau_padding_before_mw_ns=1000e-9*1e9
-tau_padding_after_mw_ns=1000e-9*1e9
-#n_repeats=250 # number of times pattern repeated within a cycle
-n_repeats=200 # number of times pattern repeated within a cycle
+# for Fig 4, 5
+tau_laser_ns=5e-6*1e9 # laser pulse width, fig 4, 5
+n_repeats=100 # number of times pattern repeated within a cycle; suggest 200 fig 4, 100 fig 5
+rabi_and_hahn_delay_s=4 # delay after setting new microwave pulse time to reading LIA output
 
-#mw_pulse_length_start_ns=0.01e-6*1e9
+# Fig 4 only:
+tau_padding_ns=1e-6*1e9 # not used for now
+tau_padding_before_mw_ns=1000e-9*1e9 # time between end of laser pulse and start of mw pulse (fig 4)
+tau_padding_after_mw_ns=1000e-9*1e9 # time between end of mw pulse and start of laser pulse (fig 4)
+tau_mw_ns=5e-6*1e9 # not used
+# Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
 mw_pulse_length_start_ns=10e-9*1e9
-
 mw_pulse_length_stop_ns=200e-9*1e9
 mw_pulse_length_number_of_points=100
 
-rabi_delay_s=4 # delay after setting new microwave pulse time to reading LIA output
-
+# Fig 5 only:
+tau_mw_X_pi_over_2_ns=15e-9*1e9 # pi/2 pulse X length (fig 5)
+tau_mw_X_pi_ns=2*tau_mw_X_pi_over_2_ns # pi pulse X length (fig 5)
+tau_mw_Y_pi_2_ns=tau_mw_X_pi_ns # pi/2 pulse Y length (fig 5)
+tau_padding_before_mw_pi_over_2_ns=1000e-9*1e9 # time between end of laser pulse and start of first mw X pi/2 pulse (fig 5)
+tau_padding_after_mw_pi_over_2_ns=1000e-9*1e9 # time between end  of second mw X pi/2 pulse and start of next laser pulse (fig 5)
+# Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
+# Fig 5 will vary T_delay between mw_T_delay_length_start_ns and mw_T_delay_length_stop_ns and measure LIA at each point
+mw_T_delay_length_start_ns=1000e-9*1e9
+mw_T_delay_length_stop_ns=10e-6*1e9
+mw_T_delay_length_number_of_points=3
+mw_T_delay_delay_s=2 # delay after setting new microwave pulse time to reading LIA output
 
 #--------------------- INITIALIZE PULSEBLASTER-------------------------
 PB_IPADDRESS= '169.254.8.2'
@@ -220,7 +241,15 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 
 #rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
 
-sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+#sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+
+
+sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
+                              tau_ref_ns,tau_laser_ns,
+                              tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_2_ns,
+                              mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
+                              tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
+                              n_repeats,number_of_cycles,ps)
 
 #print("T1_Decay_Synchronized.py:  -----------------------------")
 print("T1_Decay_Synchronized.py: sequences created")
@@ -262,6 +291,16 @@ if(fig_mode==4):
 
 
 
+if(fig_mode==5):
+    
+# copy of time delay array
+# Generate non-integer delays
+    #delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
+    delays = np.linspace(mw_T_delay_length_start_ns, mw_T_delay_length_stop_ns, mw_T_delay_length_number_of_points)
+    delays = np.round(delays).astype(int)
+    print("T1_Decay_Synchronized.py: mw_pulse_lengths_ns=")
+    print(delays)
+#loop over and read the signal from the Labjack T7 and append the value to the intensity array
 
 #--------------LOOP START----------------------------
 
@@ -294,22 +333,18 @@ if(fig_mode==3):
 
 num_points=len(delays)
 i=0
-if(fig_mode==4):
-
-
+#if(fig_mode==4):
+if fig_mode == 4 or fig_mode == 5: # both loops are same code
     # Get the current time
     current_time = datetime.now()
     print("Current time:", current_time.strftime("%Y-%m-%d %H:%M:%S"))
-    time_to_complete_seconds=(step_time+rabi_delay_s)*mw_pulse_length_number_of_points
+    time_to_complete_seconds=(step_time+rabi_and_hahn_delay_s)*mw_pulse_length_number_of_points
     # Convert total time to minutes and seconds
     minutes, seconds = divmod(time_to_complete_seconds, 60)
     print(f"Estimated time to complete: {int(minutes)} minutes and {int(seconds)} seconds")
     completion_time = current_time + timedelta(seconds=time_to_complete_seconds)
     print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"))
     print("Starting collecting")
-
-
-
 
     print("Point, Tau(ns), result, time")
     for sequence, tau in zip(sequences, delays):
@@ -321,7 +356,7 @@ if(fig_mode==4):
         ps.stream(sequence)
         ps.startNow()
         #print("starting at",datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        time.sleep(rabi_delay_s)
+        time.sleep(rabi_and_hahn_delay_s)
         results = ljm.eReadNames(handle, numFrames, names)
         pairs.append((1e-9*tau,abs(results[0])))  # Append the tuple to the list
         x=abs(results[0])
@@ -331,7 +366,6 @@ if(fig_mode==4):
         ljm.waitForNextInterval(intervalHandle)
 
     
-
 #--------------------- DISPLAY DATA AND SAVE TO FILE-------------------------
 
 #print(pairs)  # Print the list of tuples
