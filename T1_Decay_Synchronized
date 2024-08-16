@@ -145,12 +145,12 @@ tau_padding_after_mw_ns=1000e-9*1e9
 n_repeats=200 # number of times pattern repeated within a cycle
 
 #mw_pulse_length_start_ns=0.01e-6*1e9
-mw_pulse_length_start_ns=10.1e-9*1e9
+mw_pulse_length_start_ns=10e-9*1e9
 
-mw_pulse_length_stop_ns=100e-9*1e9
-mw_pulse_length_number_of_points=50
+mw_pulse_length_stop_ns=200e-9*1e9
+mw_pulse_length_number_of_points=100
 
-rabi_delay_s=2 # delay after setting new microwave pulse time to reading LIA output
+rabi_delay_s=4 # delay after setting new microwave pulse time to reading LIA output
 
 
 #--------------------- INITIALIZE PULSEBLASTER-------------------------

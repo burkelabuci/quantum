@@ -34,7 +34,7 @@ import keyboard
 import time 
 from T1_Decay_Subroutines import *
 from T1_Decay_parameters import *
-
+import numpy as np
 
 # Parameters
 PB_IPADDRESS= '169.254.8.2'
@@ -72,20 +72,20 @@ start_frequency = 2600 #in MHz
 stop_frequency = 3100 #in MHz
 step_size = int(1) # specing between each frequency point in MHz
 step_time = int(300) #in milliseconds
-base_folder = r"C:\Users\BurkeLab\Desktop\081424" # Specify the base folder where you want to save the files
+base_folder = r"C:\Users\BurkeLab\Desktop\081524" # Specify the base folder where you want to save the files
 
 
 
 
 
 # Parameters for tau_mw_ns values
-tau_mw_ns_start = 0.01e-6 * 1e9  # Start value for tau_mw_ns
-tau_mw_ns_stop = 500e-9 * 1e9  # Stop value for tau_mw_ns
-tau_mw_ns_points = 24  # Number of points for tau_mw_ns
+tau_mw_ns_start = 70e-9 * 1e9  # Start value for tau_mw_ns
+tau_mw_ns_stop = 90e-9 * 1e9  # Stop value for tau_mw_ns
+tau_mw_ns_points = 3  # Number of points for tau_mw_ns
 
 # Calculate tau_mw_ns values
 tau_mw_ns_values = np.linspace(tau_mw_ns_start, tau_mw_ns_stop, tau_mw_ns_points)
-
+tau_mw_ns_values = np.round(tau_mw_ns_values).astype(int)
 print(tau_mw_ns_values)
 
 
