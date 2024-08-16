@@ -128,7 +128,7 @@ plotname = generate_unique_filename(base_folder)# Generate unique filename with 
 #--------------------- PARAMETERS-------------------------
 
 # for both fig 3 and fig 4 and fig 5 and 6
-fig_mode=5 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
+fig_mode=4 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
 channel_number_ref=0
 channel_number_pulse=1
 channel_number_laser_pulse=1 # same thing as channel_number_pulse
