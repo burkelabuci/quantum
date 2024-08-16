@@ -986,7 +986,7 @@ def    create_fig_5_laser_pattern_array(tau_ref_ns,tau_laser_ns,
     tau_padding_after_mw_pi_over_2_ns=int(tau_padding_after_mw_pi_over_2_ns)
 
 
-    tau_laser_off_time_subunit= tau_padding_before_mw_pi_over_2_ns+tau_mw_X_pi_over_2_ns+mw_T_delay_length_ns+tau_mw_X_pi_ns+tau_mw_Y_pi_2_ns+tau_padding_after_mw_pi_over_2_ns
+    tau_laser_off_time_subunit= tau_padding_before_mw_pi_over_2_ns+tau_mw_X_pi_over_2_ns+mw_T_delay_length_ns+tau_mw_X_pi_ns+mw_T_delay_length_ns+tau_mw_Y_pi_2_ns+tau_padding_after_mw_pi_over_2_ns
     # off time of laser before it is on again
 
     pattern_1_subunit = [
@@ -1058,21 +1058,9 @@ def  create_fig_5_mw_pattern_array(tau_ref_ns,tau_laser_ns,
         (tau_padding_after_mw_pi_over_2_ns,0)
     ]
     total_time = sum(pair[0] for pair in pattern_1_subunit)
-    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_subunit xxx: {total_time} ns")
-    
-    # Calculate the amount of padding needed to make total_time a multiple of 8 ns
-    padding_needed = (8 - (total_time % 8)) % 8
-    #padding_needed=int(padding_needed)
-    # Append the required padding to the pattern
-    adjusted_pattern = pattern_1_subunit + [(padding_needed, 0)]
-    #print("create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: adjusted_pattern =")
-    #print(adjusted_pattern)
-
-
-    pattern_1_subunit = adjusted_pattern
-    total_time = sum(pair[0] for pair in pattern_1_subunit)
-    
-       
+    print("create_fig_5_mw_pattern_array:total_time=",total_time)
+   
+           
     # there is still a large 0 here
 #    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns+tau_mw_ns_rounded_to_10ps+tau_padding_before_mw_ns+tau_padding_after_mw_ns)
     pattern_1_end_time_ns=tau_ref_ns-n_repeats*total_time
@@ -1083,27 +1071,11 @@ def  create_fig_5_mw_pattern_array(tau_ref_ns,tau_laser_ns,
         print("error, too many repeats!")
     
     pattern_1=pattern_1_subunit*n_repeats+pattern_1_end # this may not be a multiple of 8 ns:
-    
-    
-    pattern_1_subunit_length_ns = sum(time for time, _ in pattern_1_subunit)
-    pattern_1_end_length_ns = sum(time for time, _ in pattern_1_end)
-    pattern_1_length_ns = sum(time for time, _ in pattern_1)
-    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_subunit_length_ns: {pattern_1_subunit_length_ns} ns")
-    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: n_repeat: {n_repeat} ")
-    
-    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_subunit_length_ns *(n_repeat): {pattern_1_subunit_length_ns*n_repeat} ns")
 
-    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_end_length_ns: {pattern_1_end_length_ns} ns")
-    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_length_ns: {pattern_1_length_ns} ns")
-
+    pattern_1_total_time = sum(pair[0] for pair in pattern_1)
+    print("create_fig_5_mw_pattern_array:pattern_1_total_time=",pattern_1_total_time)
     
-    
-    
-    # Internally, the Pulse Streamer hardware is always splitting the sequence data into 8 nanosecond long chunks. When a sequence is shorter than 8 ns or its length is not an exact multiple of 8 ns the extra time will be padded to complete the last chunk. You can observe the effects of such padding if you try to stream a short pulse repetitively.
-    #https://www.swabianinstruments.com/static/documentation/PulseStreamer/sections/api-doc.html
-    
-    # PJB 8/14/2024 We will only use tau_ref_ns_rounded since this will ensure each cycle is 8 ns multiples. The white space at the end will assure this.
-    # Anyways, Tref is usually  2.5 ms or 15 ms, so an 8 ns round will not matter.
+    # Now do second half of pattern (all MW off)
     
     tau_laser_off_time_subunit= tau_padding_before_mw_pi_over_2_ns+tau_mw_X_pi_over_2_ns+mw_T_delay_length_ns+tau_mw_X_pi_ns+tau_mw_Y_pi_2_ns+tau_padding_after_mw_pi_over_2_ns
     # off time of laser before it is on again
@@ -1125,7 +1097,11 @@ def  create_fig_5_mw_pattern_array(tau_ref_ns,tau_laser_ns,
     
     pattern_2_end = pattern_1_end
     
-    pattern_2=pattern_2_subunit*n_repeats + pattern_2_end
+    pattern_2=[
+        (tau_ref_ns,0)
+    ]
+    # tau_ref off
+    
 
     
     pattern = pattern_1 + pattern_2

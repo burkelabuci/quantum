@@ -162,15 +162,15 @@ mw_pulse_length_stop_ns=200e-9*1e9
 mw_pulse_length_number_of_points=100
 
 # Fig 5 only:
-tau_mw_X_pi_over_2_ns=15e-9*1e9 # pi/2 pulse X length (fig 5)
+tau_mw_X_pi_over_2_ns=50e-9*1e9 # pi/2 pulse X length (fig 5)
 tau_mw_X_pi_ns=2*tau_mw_X_pi_over_2_ns # pi pulse X length (fig 5)
 tau_mw_Y_pi_2_ns=tau_mw_X_pi_ns # pi/2 pulse Y length (fig 5)
 tau_padding_before_mw_pi_over_2_ns=1000e-9*1e9 # time between end of laser pulse and start of first mw X pi/2 pulse (fig 5)
 tau_padding_after_mw_pi_over_2_ns=1000e-9*1e9 # time between end  of second mw X pi/2 pulse and start of next laser pulse (fig 5)
 # Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
 # Fig 5 will vary T_delay between mw_T_delay_length_start_ns and mw_T_delay_length_stop_ns and measure LIA at each point
-mw_T_delay_length_start_ns=1000e-9*1e9
-mw_T_delay_length_stop_ns=10e-6*1e9
+mw_T_delay_length_start_ns=100e-9*1e9
+mw_T_delay_length_stop_ns=1e-6*1e9
 mw_T_delay_length_number_of_points=3
 mw_T_delay_delay_s=2 # delay after setting new microwave pulse time to reading LIA output
 
