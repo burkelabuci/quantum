@@ -1370,7 +1370,7 @@ def  create_fig_5_mw_Y_pattern_array(tau_ref_ns,tau_laser_ns,
     return pattern_array
 
 
-def    create_fig_6_laser_pattern_array(tau_ref_ns,tau_laser_ns,
+def    create_fig_6_laser_pattern_arrayold(tau_ref_ns,tau_laser_ns,
                                                     tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
                                                     mw_T_delay_length_ns,
                                                     tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
@@ -1418,6 +1418,86 @@ def    create_fig_6_laser_pattern_array(tau_ref_ns,tau_laser_ns,
     pattern_2=pattern_2_subunit*n_repeats + pattern_2_end
     
     pattern = pattern_1 + pattern_2
+    
+    pattern_array = pattern * number_of_cycles
+    # Calculate and print the total length in nanoseconds
+    total_length_ns = sum(time for time, _ in pattern_array)
+    #print(f"create_fig_4_laser_pattern_array_rounded_to_8_ns_version_2 Total sequence length: {total_length_ns} ns")
+    # Check if the total length is a multiple of 8
+    if total_length_ns % 8 != 0:
+        print("create_fig_5_laser_pattern_array: Error: Total sequence length is not a multiple of 8 ns")
+        print(f"Total sequence length: {total_length_ns} ns")
+        print("Function arguments:")
+        print(f"tau_ref_ns = {tau_ref_ns}")
+        print(f"tau_laser_ns = {tau_laser_ns}")
+        print(f"n_repeat = {n_repeats}")
+        print(f"number_of_cycles = {number_of_cycles}")
+    return pattern_array
+
+
+
+def    create_fig_6_laser_pattern_array(tau_ref_ns,tau_laser_ns,
+                                                    tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
+                                                    mw_T_delay_length_ns,
+                                                    tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
+                                                    N_CPMG,
+                                                    n_repeats,number_of_cycles):
+
+
+    # round all to integers ns so the 8 ns thing goes away hopefully
+    tau_mw_X_pi_over_2_ns=int(tau_mw_X_pi_over_2_ns)
+    tau_mw_X_pi_ns=int(tau_mw_X_pi_ns)
+    tau_mw_Y_pi_ns=int(tau_mw_Y_pi_ns)
+    mw_T_delay_length_ns=int(mw_T_delay_length_ns)
+    tau_padding_before_mw_pi_over_2_ns=int(tau_padding_before_mw_pi_over_2_ns)
+    tau_padding_after_mw_pi_over_2_ns=int(tau_padding_after_mw_pi_over_2_ns)
+    mw_T_delay_length_ns_over_2=int(mw_T_delay_length_ns/2)
+
+
+   
+    pattern_1_subunit_before_CPMG = [
+        (tau_laser_ns, 1), 
+        (tau_padding_before_mw_pi_over_2_ns+tau_mw_X_pi_over_2_ns, 0)
+    ]
+    blank_time_pattern_1_subunit_during_CPMG_single_focus= mw_T_delay_length_ns_over_2 + tau_mw_Y_pi_ns + mw_T_delay_length_ns + tau_mw_Y_pi_ns + mw_T_delay_length_ns_over_2
+    pattern_1_subunit_during_CPMG_single_focus = [
+        (blank_time_pattern_1_subunit_during_CPMG_single_focus, 0) 
+    ]
+    pattern_1_subunit_during_CPMG = N_CPMG*pattern_1_subunit_during_CPMG_single_focus
+    
+    pattern_1_subunit_after_CPMG = [
+        (tau_mw_X_pi_over_2_ns, 0),
+        (tau_padding_after_mw_pi_over_2_ns,0)
+    ]
+
+    pattern_1_subunit = pattern_1_subunit_before_CPMG + pattern_1_subunit_during_CPMG + pattern_1_subunit_after_CPMG
+    print("create_fig_6_mw_pattern_array:pattern_1_subunit=")
+    print(pattern_1_subunit)
+    total_time = sum(pair[0] for pair in pattern_1_subunit)
+    print("create_fig_5_mw_pattern_array:total_time=",total_time)
+   
+           
+    # there is still a large 0 here
+#    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns+tau_mw_ns_rounded_to_10ps+tau_padding_before_mw_ns+tau_padding_after_mw_ns)
+    pattern_1_end_time_ns=tau_ref_ns-n_repeats*total_time
+    pattern_1_end=[
+        (pattern_1_end_time_ns,0)
+    ]
+    if(pattern_1_end_time_ns<0):
+        print("error, too many repeats!")
+    
+    pattern_1=pattern_1_subunit*n_repeats+pattern_1_end # this may not be a multiple of 8 ns:
+
+    pattern_1_total_time = sum(pair[0] for pair in pattern_1)
+    print("create_fig_5_mw_pattern_array:pattern_1_total_time=",pattern_1_total_time)
+    
+
+
+
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    
+    pattern = pattern_1 + pattern_1 # second cycle laser pattern is identical to first cycle
     
     pattern_array = pattern * number_of_cycles
     # Calculate and print the total length in nanoseconds

@@ -176,7 +176,7 @@ tau_padding_before_mw_pi_over_2_ns=1000e-9*1e9 # time between end of laser pulse
 tau_padding_after_mw_pi_over_2_ns=1000e-9*1e9 # time between end  of second mw X pi/2 pulse and start of next laser pulse (fig 5)
 # Fig 5,6 will vary T_delay between mw_T_delay_length_start_ns and mw_T_delay_length_stop_ns and measure LIA at each point
 mw_T_delay_length_start_ns=100e-9*1e9
-mw_T_delay_length_stop_ns=200e-9*1e9
+mw_T_delay_length_stop_ns=500e-9*1e9
 mw_T_delay_length_number_of_points=3
 mw_T_delay_delay_s=2 # delay after setting new microwave pulse time to reading LIA output
 
