@@ -93,9 +93,8 @@
 # 
 #----------------INSTRUCTIONS------------------------------------
 #To generate Fig 6 of teaching paper: (CPMG )
-# (Note this is IN PROGRESS starting 8/16/2024, PJB)
 
-# configure parameters below that pertain to fig 5
+# configure parameters below that pertain to fig 6
 # fig_mode=6 for figure 6.
 # uncomment  sequences=CPMG_many_sequences(...
 # 
@@ -129,7 +128,7 @@ plotname = generate_unique_filename(base_folder)# Generate unique filename with 
 #--------------------- PARAMETERS-------------------------
 
 # for both fig 3 and fig 4 and fig 5 and 6
-fig_mode=6 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
+fig_mode=5 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
 channel_number_ref=0
 channel_number_pulse=1
 channel_number_laser_pulse=1 # same thing as channel_number_pulse
@@ -250,7 +249,7 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 
 #rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
 
-#sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
 
 
 #sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
@@ -260,13 +259,13 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 #                              tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
 #                              n_repeats,number_of_cycles,ps)
 
-sequences=CPMG_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
-                              tau_ref_ns,tau_laser_ns,
-                              tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
-                              mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
-                              tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
-                              N_CPMG,
-                              n_repeats,number_of_cycles,ps)
+#sequences=CPMG_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
+#                              tau_ref_ns,tau_laser_ns,
+#                              tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
+#                              mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
+#                              tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
+#                              N_CPMG,
+#                              n_repeats,number_of_cycles,ps)
 
 #print("T1_Decay_Synchronized.py:  -----------------------------")
 print("T1_Decay_Synchronized.py: sequences created")
