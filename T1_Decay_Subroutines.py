@@ -406,7 +406,7 @@ def create_fig5_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     pulse_patt_ref = generate_alternating_pairs(square_wave_half_cycle_ns,2*number_of_cycles)
     seq.setDigital(channel_number_ref, pulse_patt_ref)
 
-    # abc
+
     #*********** THEN PULSE CYCLE LASER***********************
     pulse_patt_laser = create_fig_5_laser_pattern_array(tau_ref_ns,tau_laser_ns,
                                                     tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_2_ns,
@@ -415,11 +415,16 @@ def create_fig5_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
                                                     n_repeats,number_of_cycles)
     seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
 
-    
+        # abc
     #*********** THEN PULSE CYCLE MW X***********************
-    #pulse_patt_mw_X = create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeats,number_of_cycles)
-    #seq.setDigital(channel_number_mw_pulse, pulse_patt_mw_X)
-    seq.setDigital(channel_number_mw_pulse, pulse_patt_laser)
+    pulse_patt_mw_X = create_fig_5_mw_pattern_array(tau_ref_ns,tau_laser_ns,
+                                                    tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_2_ns,
+                                                    mw_T_delay_length_ns,
+                                                    tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
+                                                    n_repeats,number_of_cycles)
+
+    seq.setDigital(channel_number_mw_pulse, pulse_patt_mw_X)
+    #seq.setDigital(channel_number_mw_pulse, pulse_patt_laser)
 
     #*********** THEN PULSE CYCLE MW Y***********************
     #pulse_patt_mw_Y = create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeats,number_of_cycles)
@@ -1029,6 +1034,134 @@ def    create_fig_5_laser_pattern_array(tau_ref_ns,tau_laser_ns,
     return pattern_array
 
 
+def  create_fig_5_mw_pattern_array(tau_ref_ns,tau_laser_ns,
+                                    tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_2_ns,
+                                    mw_T_delay_length_ns,
+                                    tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
+                                    n_repeats,number_of_cycles):
+
+    # round all to integers ns so the 8 ns thing goes away hopefully
+    tau_mw_X_pi_over_2_ns=int(tau_mw_X_pi_over_2_ns)
+    tau_mw_X_pi_ns=int(tau_mw_X_pi_ns)
+    tau_mw_Y_pi_2_ns=int(tau_mw_Y_pi_2_ns)
+    mw_T_delay_length_ns=int(mw_T_delay_length_ns)
+    tau_padding_before_mw_pi_over_2_ns=int(tau_padding_before_mw_pi_over_2_ns)
+    tau_padding_after_mw_pi_over_2_ns=int(tau_padding_after_mw_pi_over_2_ns)
+    
+    pattern_1_subunit = [
+        (tau_laser_ns+tau_padding_before_mw_pi_over_2_ns, 0), 
+        (tau_mw_X_pi_over_2_ns, 1),
+        (mw_T_delay_length_ns,0),
+        (tau_mw_X_pi_ns, 1),
+        (mw_T_delay_length_ns,0),
+        (tau_mw_X_pi_over_2_ns, 1),
+        (tau_padding_after_mw_pi_over_2_ns,0)
+    ]
+    total_time = sum(pair[0] for pair in pattern_1_subunit)
+    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_subunit xxx: {total_time} ns")
+    
+    # Calculate the amount of padding needed to make total_time a multiple of 8 ns
+    padding_needed = (8 - (total_time % 8)) % 8
+    #padding_needed=int(padding_needed)
+    # Append the required padding to the pattern
+    adjusted_pattern = pattern_1_subunit + [(padding_needed, 0)]
+    #print("create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: adjusted_pattern =")
+    #print(adjusted_pattern)
+
+
+    pattern_1_subunit = adjusted_pattern
+    total_time = sum(pair[0] for pair in pattern_1_subunit)
+    
+       
+    # there is still a large 0 here
+#    pattern_1_end_time_ns=tau_ref_ns_rounded-n_repeat*(tau_laser_ns+tau_mw_ns_rounded_to_10ps+tau_padding_before_mw_ns+tau_padding_after_mw_ns)
+    pattern_1_end_time_ns=tau_ref_ns-n_repeats*total_time
+    pattern_1_end=[
+        (pattern_1_end_time_ns,0)
+    ]
+    if(pattern_1_end_time_ns<0):
+        print("error, too many repeats!")
+    
+    pattern_1=pattern_1_subunit*n_repeats+pattern_1_end # this may not be a multiple of 8 ns:
+    
+    
+    pattern_1_subunit_length_ns = sum(time for time, _ in pattern_1_subunit)
+    pattern_1_end_length_ns = sum(time for time, _ in pattern_1_end)
+    pattern_1_length_ns = sum(time for time, _ in pattern_1)
+    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_subunit_length_ns: {pattern_1_subunit_length_ns} ns")
+    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: n_repeat: {n_repeat} ")
+    
+    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_subunit_length_ns *(n_repeat): {pattern_1_subunit_length_ns*n_repeat} ns")
+
+    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_end_length_ns: {pattern_1_end_length_ns} ns")
+    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2: pattern_1_length_ns: {pattern_1_length_ns} ns")
+
+    
+    
+    
+    # Internally, the Pulse Streamer hardware is always splitting the sequence data into 8 nanosecond long chunks. When a sequence is shorter than 8 ns or its length is not an exact multiple of 8 ns the extra time will be padded to complete the last chunk. You can observe the effects of such padding if you try to stream a short pulse repetitively.
+    #https://www.swabianinstruments.com/static/documentation/PulseStreamer/sections/api-doc.html
+    
+    # PJB 8/14/2024 We will only use tau_ref_ns_rounded since this will ensure each cycle is 8 ns multiples. The white space at the end will assure this.
+    # Anyways, Tref is usually  2.5 ms or 15 ms, so an 8 ns round will not matter.
+    
+    tau_laser_off_time_subunit= tau_padding_before_mw_pi_over_2_ns+tau_mw_X_pi_over_2_ns+mw_T_delay_length_ns+tau_mw_X_pi_ns+tau_mw_Y_pi_2_ns+tau_padding_after_mw_pi_over_2_ns
+    # off time of laser before it is on again
+
+    pattern_2_subunit = [
+        (tau_laser_ns+tau_laser_off_time_subunit, 0)
+    ]
+
+    total_time = sum(pair[0] for pair in pattern_2_subunit)
+    
+    # Calculate the amount of padding needed to make total_time a multiple of 8 ns
+    padding_needed = (8 - (total_time % 8)) % 8
+    
+    # Append the required padding to the pattern
+    adjusted_pattern = pattern_2_subunit + [(padding_needed, 0)]
+    
+    pattern_2_subunit = adjusted_pattern
+    
+    
+    pattern_2_end = pattern_1_end
+    
+    pattern_2=pattern_2_subunit*n_repeats + pattern_2_end
+
+    
+    pattern = pattern_1 + pattern_2
+    
+    pattern_array = pattern * number_of_cycles
+    # Calculate and print the total length in nanoseconds
+    total_length_ns = sum(time for time, _ in pattern_array)
+    #print(f"create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2 Total sequence length: {total_length_ns} ns")
+
+
+    #print(f"Total sequence length: {total_length_ns} ns")
+    # Check if the total length is a multiple of 8
+    if total_length_ns % 8 != 0:
+        print("#################### create_fig_4_mw_pattern_array_rounded_to_8_ns")            
+        print("Error: Total sequence length is not a multiple of 8 ns")
+        print(f"Total sequence length: {total_length_ns} ns")
+        print("Function arguments:")
+        print(f"tau_ref_ns = {tau_ref_ns}")
+        print(f"tau_laser_ns = {tau_laser_ns}")
+        print("####################")            
+        pattern_1_subunit_length_ns = sum(time for time, _ in pattern_1_subunit)
+        pattern_1_end_length_ns = sum(time for time, _ in pattern_1_end)
+        pattern_1_length_ns = sum(time for time, _ in pattern_1)
+        print(f"pattern_1_subunit_length_ns: {pattern_1_subunit_length_ns} ns")
+        
+        print(f"pattern_1_subunit_length_ns *(n_repeat): {pattern_1_subunit_length_ns*n_repeat} ns")
+
+        print(f"pattern_1_end_length_ns: {pattern_1_end_length_ns} ns")
+        print(f"pattern_1_length_ns: {pattern_1_length_ns} ns")
+        print("####################")            
+        
+
+    
+
+
+    return pattern_array
 def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeat,n):
 
     #round_to_nearest_8ns(value)
@@ -1074,6 +1207,7 @@ def create_fig_4_mw_pattern_array_rounded_to_8_ns(tau_ref_ns, tau_laser_ns, tau_
     return pattern_array
 
 def create_fig_4_mw_pattern_array_rounded_to_8_ns_version_2(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeat,n):
+
 
     #round_to_nearest_8ns(value)
     # only round the total wavetime to 8 ns, not each individual component
