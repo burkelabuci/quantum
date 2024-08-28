@@ -31,16 +31,16 @@ tau_i_ns=5e-6*1e9 # laser initialization/readout pulse width
 number_of_cycles=200 # default 33 fig 3, 200 fig 4; sets how long each pulse pattern is for a given delay
 channel_number_ref=0
 channel_number_pulse=1
-delay_start_s=100e-6
-delay_stop_s=1e-6
-delay_number_of_points=100
-step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds
-step_time_microseconds=step_time*1e6
-tau_delay_ns=1e-3*1e9
+delay_start_s=100e-6 # fig 3 only
+delay_stop_s=1e-6 # fig 3 only
+delay_number_of_points=100 # fig 3 only
+step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds # calculated
+step_time_microseconds=step_time*1e6 # calculated
+tau_delay_ns=1e-3*1e9 # fig 3 only
 
 # for Fig 4
 tau_laser_ns=5e-6*1e9
-tau_mw_ns=0.5e-6*1e9
+tau_mw_ns=5e-6*1e9
 tau_padding_ns=1e-6*1e9
 n_repeats=175 # 250  but with padding must be less
 tau_padding_before_mw_ns=1000e-9*1e9

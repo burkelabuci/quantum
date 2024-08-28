@@ -68,20 +68,20 @@ tau_padding_after_mw_ns=1000e-9*1e9
 
 
 # Parameters for chopped ODMR:
-start_frequency = 2600 #in MHz
-stop_frequency = 3100 #in MHz
+start_frequency = 2400 #in MHz
+stop_frequency = 3200 #in MHz
 step_size = int(1) # specing between each frequency point in MHz
 step_time = int(300) #in milliseconds
-base_folder = r"C:\Users\BurkeLab\Desktop\081524" # Specify the base folder where you want to save the files
+base_folder = r"C:\Users\BurkeLab\Desktop\082324" # Specify the base folder where you want to save the files
 
 
 
 
 
 # Parameters for tau_mw_ns values
-tau_mw_ns_start = 70e-9 * 1e9  # Start value for tau_mw_ns
-tau_mw_ns_stop = 90e-9 * 1e9  # Stop value for tau_mw_ns
-tau_mw_ns_points = 3  # Number of points for tau_mw_ns
+tau_mw_ns_start = 10e-9 * 1e9  # Start value for tau_mw_ns
+tau_mw_ns_stop = 250e-9 * 1e9  # Stop value for tau_mw_ns
+tau_mw_ns_points = 20  # Number of points for tau_mw_ns
 
 # Calculate tau_mw_ns values
 tau_mw_ns_values = np.linspace(tau_mw_ns_start, tau_mw_ns_stop, tau_mw_ns_points)
