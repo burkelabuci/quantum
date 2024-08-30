@@ -15,6 +15,7 @@
  
 
 #import libraries
+import threading
 from labjack import ljm
 import sys
 import pandas as pd
@@ -25,8 +26,17 @@ from datetime import datetime, timedelta
 import time
 from datetime import datetime
 import os
+from main import *
+from SR830lockin_settings_achieve import query_lockin_parameters, write_parameters_to_file
+from Burkelab_Filenaming import create_folder_and_generate_filename_lockin,create_folder_and_generate_filename_csv
+import pyvisa
+#____________________________________________________________________________________________________________________________________________________
+lockin_parameters_text_name = create_folder_and_generate_filename_lockin()  # Generate unique filename with name SR830_lockinmmddyy
 
 
+plotname = create_folder_and_generate_filename_csv()# Generate unique filename with name mm/dd/yy (eg. 070324)
+
+#___________________________________________________________________________________________________________________________________________________________
 #Parameters for the microwave:
 start_frequency = 2400   #in MHz
 stop_frequency = 3200 #in MHz
@@ -34,79 +44,36 @@ stop_frequency = 3200 #in MHz
 step_size = int(1) # specing between each frequency point in MHz
 step_time = int(300) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
-base_folder = r"C:\Users\BurkeLab\Desktop\082324" # Specify the base folder where you want to save the files
+
 
 #arrays that will be used for plot
 frequencies= []
 
-def generate_unique_filename(base_folder):
-    # Ensure base_folder exists, create if it doesn't
-    os.makedirs(base_folder, exist_ok=True)
-    
-    # Get current date
-    now = datetime.now()
-    month = now.strftime('%m')  # Month as 2 digits (e.g., 06)
-    day = now.strftime('%d')    # Day as 2 digits (e.g., 17)
-    year = now.strftime('%y')   # Year as 2 digits (e.g., 24)
-    
-    # Find existing files in base_folder
-    existing_files = os.listdir(base_folder)
-    
-    # Initialize file_number
-    file_number = 1
-    
-    # Iterate through existing files to find the next available file_number
-    while True:
-        filename = f"{month}{day}{year}{file_number:04d}"
-        if f"{filename}.csv" not in existing_files:
-            break
-        file_number += 1
-    
-    # Return the filepath with the next available file_number
-    filepath = os.path.join(base_folder, f"{filename}.csv")
-    return filepath
-
-# Generate unique filename
-plotname = generate_unique_filename(base_folder)
-
-print(f"Unique filename: {plotname}")
 
 
 print("\n \t \t Qubit initialization Process; ODMR Single Plot \n \n")
 
 print("\t \t Initializing Systems \n \n")
 
-#open the labjack 
-#For Labjack T7 instruction for communication with python, see https://support.labjack.com/docs/python-for-ljm-windows-mac-linux
-handle = ljm.openS("ANY", "ANY")
- 
+#______________________________________________________________________________________________________________
+#connect to GPIB
+os.add_dll_directory("C:/Program Files/Keysight/IO Libraries Suite/bin")
+os.add_dll_directory("C:/Program Files (x86)/Keysight/IO Libraries Suite/bin")
+rm = pyvisa.ResourceManager("C:/Windows/System32/visa32.dll")
 
-#AIN#_NEGATIVE_CH: Specifies the negative channel to be used for each positive channel. 199=Default=> Single-Ended.
-#AIN#_RANGE: The range/span of each analog input. Write the highest expected input voltage. For T7, the default is -10V to 10V
-#AIN#_RESOLUTION_INDEX: The resolution index for command-response and AIN-EF readings. A larger resolution index generally results in lower noise and longer sample times.
-#Default value of 0 corresponds to an index of 8 (T7) 
-#AIN#_SETTLING_US: Settling time for command-response and AIN-EF readings. For T-7: Auto. Max is 50000 (microseconds).
+#connect the GPIB with the PC
+lockin = rm.open_resource('GPIB0::8::INSTR')
+#_____________________________________________________________________________________________________
 
-names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US",
-             "AIN1_NEGATIVE_CH", "AIN1_RANGE", "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
-
-#Default values
-aValues = [199, 10.0, 0, 0, 199, 10.0, 0, 0]
-num_Frames= len(names)
-
-ljm.eWriteNames(handle, num_Frames, names, aValues)
+print("GPIB connected, querying lockin parameters")
+# Query the Lock-In parameters
+parameters = query_lockin_parameters()
 
 
-numFrames = 2
-names = ["AIN0", "DAC0"]
-
-intervalHandle = 1
-
-
-
+#____________________________________________________________________________________________________
 #Microwave VCO initialization
 synth = SynthHD("COM3")
-print("\t \t Set Parameters \n \n")
+print("\t \t Set microwave Parameters \n \n")
 
 # Define the frequency array in Hz
 frequencies = [i * 1e6 for i in range(start_frequency, stop_frequency, step_size)]
@@ -137,53 +104,89 @@ completion_time = current_time + timedelta(seconds=time_to_complete_seconds)
 print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"))
 print("Starting collecting")
 
-revised_steptime= step_time*1000
-ljm.startInterval(intervalHandle, revised_steptime)
 
 
 #define intensity array
 intensities= []
 
-#sweep once the microwave frequencies
-#for sweep continuously:
-#synth.write("sweep_cont",True)
-synth.write("sweep_single",True)
-print("Actual sweep once true")
+# Microwave sweep function
+def microwave_sweep():
+    # Sweep once the microwave frequencies
+    synth.write("sweep_single", True)
+    print("Microwave single sweep started")
 
 #loop over and read the signal from the Labjack T7 and append the value to the intensity array
-j=0
-while True:
-    try:
-        results = ljm.eReadNames(handle, numFrames, names)
-        intensities.append(abs(results[0]))
-        ljm.waitForNextInterval(intervalHandle)
-        if loopAmount != "infinite":
-            j=j+1
-            if j>= loopAmount:
-                break
-    except KeyboardInterrupt:
-        break
-    except Exception:
-        print(sys.exc_info()[1])
-        break
+read_steptime= step_time/1000
 
+def read_lockin_display():
+    j = 0
+    while True:
+        try:
+            # Query the CH1 display value from the Lock-In Amplifier
+            ch1_display_value = lockin.query('OUTR? 1').strip()
+            
+            # Convert the display value to a float and append to intensities
+            intensities.append(float(ch1_display_value))
+            
+            time.sleep(read_steptime)
+            
+            # Check if the loop should terminate
+            if loopAmount != "infinite":
+                j += 1
+                if j >= loopAmount:
+                    break
+                    
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            print(f"Error: {e}")
+            break
+# Create threads
+microwave_thread = threading.Thread(target=microwave_sweep)
+lockin_thread = threading.Thread(target=read_lockin_display)
+
+# Start threads
+microwave_thread.start()
+lockin_thread.start()
+
+# Wait for both threads to complete
+microwave_thread.join()
+lockin_thread.join()
 
 
 #save the data ie, frequency and intensity as a csv file
 saved_dict= {
     "frequencies (Hz)": frequencies,
-    "Labjack voltage (V)": intensities
+    "Lockin reading (A)": intensities
 }
 
 df= pd.DataFrame(saved_dict)
 csv_filepath = plotname  # using plotname as the CSV filename
 df.to_csv(csv_filepath, sep="\t")  # save CSV without index
 
+print(f'Data file has been saved to {plotname}')
+
+# Write the settings to the text file
+write_parameters_to_file(lockin_parameters_text_name, parameters)
+
+print(f'Lockin parameters have been saved to {lockin_parameters_text_name}')
+
+# Return the microwave to the start frequency
+print("Returning microwave to the start frequency...")
+synth.write("frequency",start_frequency)
+print("Microwave frequency reset complete.")
 
 # Plot and save figure
-plt.plot(frequencies, intensities)
+plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
+plt.plot(frequencies, intensities, color='blue', marker='o', linestyle='-', label='ODMR Data Line')
+plt.title('Lockin Reading vs RF Frequency')
 plt.xlabel("Microwave Frequency (Hz)")
-plt.ylabel("labjack voltage (V)")
+plt.ylabel("Lockin Reading (A)")
+
+# Display the plot
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
 
 # Display the plot
 plt.show()

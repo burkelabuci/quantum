@@ -101,7 +101,7 @@
 
 #---------------------------------------------------------------
 
-
+import threading
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -117,12 +117,16 @@ import os
 import csv
 from main import *
 from T1_Decay_Subroutines import *
+from SR830lockin_settings_achieve import query_lockin_parameters, write_parameters_to_file
+from Burkelab_Filenaming import create_folder_and_generate_filename_lockin,create_folder_and_generate_filename_csv
+import pyvisa
 
-base_path = r"C:\Users\BurkeLab\Desktop" # Specify the path where you want to create a data folder
 
-base_folder = create_date_folder(base_path) #create a folder with name mm/dd/yy (eg. 070324) where you want to save your data
+lockin_parameters_text_name = create_folder_and_generate_filename_lockin()  # Generate unique filename with name SR830_lockinmmddyy
 
-plotname = generate_unique_filename(base_folder)# Generate unique filename with name mm/dd/yy (eg. 070324)
+
+plotname = create_folder_and_generate_filename_csv()# Generate unique filename with name mm/dd/yy (eg. 070324)
+
 
 
 #--------------------- PARAMETERS-------------------------
@@ -219,6 +223,18 @@ intervalHandle = 1
 
 ljm.startInterval(intervalHandle, int(step_time_microseconds))
 
+#______________________________________________
+#connect to GPIB
+os.add_dll_directory("C:/Program Files/Keysight/IO Libraries Suite/bin")
+os.add_dll_directory("C:/Program Files (x86)/Keysight/IO Libraries Suite/bin")
+rm = pyvisa.ResourceManager("C:/Windows/System32/visa32.dll")
+
+#connect the GPIB with the PC
+lockin = rm.open_resource('GPIB0::8::INSTR')
+
+# Query the Lock-In parameters
+parameters = query_lockin_parameters()
+
 
 #--------------------- DOWNLOADED PULSES STREAM TO PULSESTREAMER-------------------------
 
@@ -241,10 +257,10 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 
 
 
-do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 
-#do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 #do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 #rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
@@ -282,7 +298,7 @@ pairs = []
 
 
 # Define column names
-columns = ['tau delay', 'labjack reading']
+columns = ['tau delay', 'lockin reading']
 
 # parameters for loop:
 loopAmount=delay_number_of_points
@@ -342,21 +358,26 @@ if(fig_mode==3):
 print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 
-
 if(fig_mode==3):
-
     ps.startNow()
     for tau in delays:
         try:
-            results = ljm.eReadNames(handle, numFrames, names)
-            print(tau,abs(results[0]))
-            pairs.append((tau,abs(results[0])))  # Append the tuple to the list
-            ljm.waitForNextInterval(intervalHandle)
+            # Query the CH1 display value from the Lock-In Amplifier
+            ch1_display_value = lockin.query('OUTR? 1').strip()
+            
+            print(tau, float(ch1_display_value))
+            # Convert the display value to a float and append to pairs
+            pairs.append((tau, float(ch1_display_value)))
+            
+            time.sleep(step_time)
         except KeyboardInterrupt:
             break
-        except Exception:
-            print(sys.exc_info()[1])
-            break
+        except Exception as e:
+            print(e)
+            break  
+
+    
+                    
 
 num_points=len(delays)
 i=0
@@ -416,12 +437,17 @@ df.to_csv(csv_filepath, sep="\t")  # save CSV without index
 
 print(f'Data file has been saved to {plotname}')
 
+# Write the settings to the text file
+write_parameters_to_file(lockin_parameters_text_name, parameters)
+
+print(f'Lockin parameters have been saved to {lockin_parameters_text_name}')
+
 # Plotting
 plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
-plt.scatter(df['tau delay'], df['labjack reading'], color='blue', marker='o', label='Data Points')
-plt.title('Labjack Reading  vs Tau Delay')
+plt.scatter(df['tau delay'], df['lockin reading'], color='blue', marker='o', label='Data Points')
+plt.title('Lockin Reading  vs Tau Delay')
 plt.xlabel('Tau Delay')
-plt.ylabel('Labjack Reading')
+plt.ylabel('Lockin Reading')
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
