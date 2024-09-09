@@ -172,7 +172,7 @@ params_df = pd.DataFrame([parameters])
 df_with_params = pd.concat([df, params_df], axis=1)
 
 # Save the combined DataFrame to CSV
-df_with_params.to_csv(csv_filepath , sep=",")  # save CSV without index
+df_with_params.to_csv(csv_filepath , sep=",")  # save CSV with index
 
 print(f'Data file has been saved to {plotname}')
 

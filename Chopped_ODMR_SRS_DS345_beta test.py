@@ -44,7 +44,7 @@ plotname = create_folder_and_generate_filename_csv()# Generate unique filename w
 #Parameters for the microwave:
 #the program will ask if defult start and stop frequecies will be used
 
-default_startfrequency = 2400 
+default_startfrequency = 2500 
 default_stopfrequency = 3200
 start_frequency,stop_frequency = default_freq(default_startfrequency,default_stopfrequency)
 loopAmount= stop_frequency-start_frequency #how many points to sweep
@@ -182,8 +182,10 @@ saved_dict= {
 
 df= pd.DataFrame(saved_dict)
 csv_filepath = plotname  # using plotname as the CSV filename
-df.to_csv(csv_filepath, sep="\t")  # save CSV without index
+df.to_csv(csv_filepath, sep=",")  # save CSV without index
 
+# Get the lock-in parameters and prepare them for adding to the DataFrame
+parameters = write_parameters_to_file(plotname, parameters)
 
 #_________________________________________________________________________
 # Plot and save figure
