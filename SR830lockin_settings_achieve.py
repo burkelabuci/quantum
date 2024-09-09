@@ -149,3 +149,4 @@ def write_parameters_to_file(filepath, parameters):
         file.write("Settings for SR830 DSP Lock-in Analyzer:\n")
         for key, value in parameters.items():
             file.write(f"{key} Setting: {value}\n")
+    return parameters

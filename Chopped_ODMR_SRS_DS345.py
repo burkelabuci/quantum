@@ -31,18 +31,16 @@ from SR830lockin_settings_achieve import query_lockin_parameters, write_paramete
 from Burkelab_Filenaming import create_folder_and_generate_filename_lockin,create_folder_and_generate_filename_csv
 import pyvisa
 #____________________________________________________________________________________________________________________________________________________
-lockin_parameters_text_name = create_folder_and_generate_filename_lockin()  # Generate unique filename with name SR830_lockinmmddyy
-
 
 plotname = create_folder_and_generate_filename_csv()# Generate unique filename with name mm/dd/yy (eg. 070324)
 
 #___________________________________________________________________________________________________________________________________________________________
 #Parameters for the microwave:
 start_frequency = 2400   #in MHz
-stop_frequency = 3200 #in MHz
+stop_frequency = 2500 #in MHz
 
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(300) #in milliseconds
+step_time = int(10) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
 
 
@@ -65,7 +63,7 @@ rm = pyvisa.ResourceManager("C:/Windows/System32/visa32.dll")
 lockin = rm.open_resource('GPIB0::8::INSTR')
 #_____________________________________________________________________________________________________
 
-print("GPIB connected, querying lockin parameters")
+print("\t \tGPIB connected, querying lockin parameters\n \n")
 # Query the Lock-In parameters
 parameters = query_lockin_parameters()
 
@@ -162,14 +160,23 @@ saved_dict= {
 
 df= pd.DataFrame(saved_dict)
 csv_filepath = plotname  # using plotname as the CSV filename
-df.to_csv(csv_filepath, sep="\t")  # save CSV without index
+df.to_csv(csv_filepath, sep=",")  # save CSV without index
+
+# Get the lock-in parameters and prepare them for adding to the DataFrame
+parameters = write_parameters_to_file(plotname, parameters)
+
+# Convert parameters dictionary to DataFrame
+params_df = pd.DataFrame([parameters])
+
+# Concatenate the DataFrame with parameters DataFrame horizontally
+df_with_params = pd.concat([df, params_df], axis=1)
+
+# Save the combined DataFrame to CSV
+df_with_params.to_csv(csv_filepath , sep=",")  # save CSV without index
 
 print(f'Data file has been saved to {plotname}')
 
-# Write the settings to the text file
-write_parameters_to_file(lockin_parameters_text_name, parameters)
-
-print(f'Lockin parameters have been saved to {lockin_parameters_text_name}')
+print(f'Lockin parameters have been saved to {plotname}')
 
 # Return the microwave to the start frequency
 print("Returning microwave to the start frequency...")

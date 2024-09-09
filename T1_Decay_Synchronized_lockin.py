@@ -104,6 +104,7 @@
 import threading
 import numpy as np
 import pandas as pd
+
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from labjack import ljm
@@ -132,15 +133,15 @@ plotname = create_folder_and_generate_filename_csv()# Generate unique filename w
 #--------------------- PARAMETERS-------------------------
 
 # for both fig 3 and fig 4 and fig 5 and 6
-fig_mode=3 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
+fig_mode=4 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
 channel_number_ref=0
 channel_number_pulse=1
 channel_number_laser_pulse=1 # same thing as channel_number_pulse
 channel_number_mw_pulse=2
 channel_number_mw_phaseshifted_pulse=3
 
-tau_ref_ns=15e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4. and 5 and 6
-number_of_cycles=33 # number of reference cycles for each data point
+tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4. and 5 and 6
+number_of_cycles=200# number of reference cycles for each data point
 # default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4, 5
 # for fig 4 200 Hz default, so want 200 cycles if 1 second between each point
 step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds, how long each data point has pulses going
@@ -153,7 +154,7 @@ tau_readout_ns=5e-6*1e9 # laser readout pulse width
 # Fig 3 will vary delay between laser init and laser readout pulse between delay_start_s and delay_stop_s and measure the LIA at each point.
 delay_start_s=3e-3
 delay_stop_s=0.01e-3
-delay_number_of_points=100
+delay_number_of_points=50
 
 
 # for Fig 4, 5, 6
@@ -167,9 +168,9 @@ tau_padding_before_mw_ns=1000e-9*1e9 # time between end of laser pulse and start
 tau_padding_after_mw_ns=1000e-9*1e9 # time between end of mw pulse and start of laser pulse (fig 4)
 tau_mw_ns=5e-6*1e9 # not used
 # Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
-mw_pulse_length_start_ns=10e-9*1e9
-mw_pulse_length_stop_ns=250e-9*1e9
-mw_pulse_length_number_of_points=100
+mw_pulse_length_start_ns=1e-9*1e9
+mw_pulse_length_stop_ns=200e-9*1e9
+mw_pulse_length_number_of_points=3
 
 # Fig 5, 6 only:
 tau_mw_X_pi_over_2_ns=50e-9*1e9 # pi/2 pulse X length (fig 5)
@@ -192,39 +193,10 @@ PB_IPADDRESS= '169.254.8.2'
 ps = PulseStreamer(PB_IPADDRESS)
 
 
-#ps.setTrigger(TriggerStart.SOFTWARE)
+ps.setTrigger(TriggerStart.SOFTWARE)
 
 
-#--------------------- INITIALIZE LABJACK-------------------------
-
-#For Labjack T7 instruction for communication with python, see https://support.labjack.com/docs/python-for-ljm-windows-mac-linux
-handle = ljm.openS("ANY", "ANY")
-
-#AIN#_NEGATIVE_CH: Specifies the negative channel to be used for each positive channel. 199=Default=> Single-Ended.
-#AIN#_RANGE: The range/span of each analog input. Write the highest expected input voltage. For T7, the default is -10V to 10V
-#AIN#_RESOLUTION_INDEX: The resolution index for command-response and AIN-EF readings. A larger resolution index generally results in lower noise and longer sample times.
-#Default value of 0 corresponds to an index of 8 (T7) 
-#AIN#_SETTLING_US: Settling time for command-response and AIN-EF readings. For T-7: Auto. Max is 50000 (microseconds).
-
-names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US",
-             "AIN1_NEGATIVE_CH", "AIN1_RANGE", "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
-
-#Default values
-aValues = [199, 10.0, 0, 0, 199, 10.0, 0, 0]
-num_Frames= len(names)
-
-ljm.eWriteNames(handle, num_Frames, names, aValues)
-
-numFrames = 2
-names = ["AIN0", "DAC0"]
-
-intervalHandle = 1
-
-
-ljm.startInterval(intervalHandle, int(step_time_microseconds))
-
-#______________________________________________
-#connect to GPIB
+#--------------------- connect to GPIB-------------------------
 os.add_dll_directory("C:/Program Files/Keysight/IO Libraries Suite/bin")
 os.add_dll_directory("C:/Program Files (x86)/Keysight/IO Libraries Suite/bin")
 rm = pyvisa.ResourceManager("C:/Windows/System32/visa32.dll")
@@ -260,12 +232,12 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 #do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 
-do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 #do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 #rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
 
-#sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
 
 
 #sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
@@ -365,11 +337,14 @@ if(fig_mode==3):
             # Query the CH1 display value from the Lock-In Amplifier
             ch1_display_value = lockin.query('OUTR? 1').strip()
             
+            
             print(tau, float(ch1_display_value))
+            
             # Convert the display value to a float and append to pairs
             pairs.append((tau, float(ch1_display_value)))
             
             time.sleep(step_time)
+            
         except KeyboardInterrupt:
             break
         except Exception as e:
@@ -405,13 +380,13 @@ if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
         ps.startNow()
         #print("starting at",datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         time.sleep(rabi_and_hahn_delay_s)
-        results = ljm.eReadNames(handle, numFrames, names)
-        pairs.append((1e-9*tau,abs(results[0])))  # Append the tuple to the list
-        x=abs(results[0])
-        print(i,int(tau),f"{x:.3f}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
+        ch1_display_value = lockin.query('OUTR? 1').strip()
+        pairs.append((1e-9*tau,float(ch1_display_value)))  # Append the tuple to the list
+        x=float(ch1_display_value)
+        print(i,int(tau),float(ch1_display_value), datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
         #print(tau,abs(results[0]))
         i=i+1
-        ljm.waitForNextInterval(intervalHandle)
+        
 
     
 #--------------------- DISPLAY DATA AND SAVE TO FILE-------------------------
@@ -433,14 +408,25 @@ df = pd.DataFrame(pairs, columns=columns)
 
 # Save DataFrame to CSV
 csv_filepath = plotname  # using plotname as the CSV filename
-df.to_csv(csv_filepath, sep="\t")  # save CSV without index
+df.to_csv(csv_filepath, sep=",")  # save CSV without index
 
 print(f'Data file has been saved to {plotname}')
 
-# Write the settings to the text file
-write_parameters_to_file(lockin_parameters_text_name, parameters)
+# Get the lock-in parameters and prepare them for adding to the DataFrame
+parameters = write_parameters_to_file(plotname, parameters)
 
-print(f'Lockin parameters have been saved to {lockin_parameters_text_name}')
+# Convert parameters dictionary to DataFrame
+params_df = pd.DataFrame([parameters])
+
+# Concatenate the DataFrame with parameters DataFrame horizontally
+df_with_params = pd.concat([df, params_df], axis=1)
+
+# Save the combined DataFrame to CSV
+df_with_params.to_csv(csv_filepath , sep=",")  # save CSV with index
+
+print(f'Data file has been saved to {plotname}')
+
+print(f'Lockin parameters have been saved to {plotname}')
 
 # Plotting
 plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
