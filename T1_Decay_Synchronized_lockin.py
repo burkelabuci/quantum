@@ -170,7 +170,7 @@ tau_mw_ns=5e-6*1e9 # not used
 # Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
 mw_pulse_length_start_ns=1e-9*1e9
 mw_pulse_length_stop_ns=200e-9*1e9
-mw_pulse_length_number_of_points=3
+mw_pulse_length_number_of_points=200
 
 # Fig 5, 6 only:
 tau_mw_X_pi_over_2_ns=50e-9*1e9 # pi/2 pulse X length (fig 5)
