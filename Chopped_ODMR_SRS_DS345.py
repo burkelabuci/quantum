@@ -40,7 +40,7 @@ start_frequency = 2400   #in MHz
 stop_frequency = 2500 #in MHz
 
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(10) #in milliseconds
+step_time = int(300) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
 
 
