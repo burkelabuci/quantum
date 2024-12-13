@@ -26,6 +26,7 @@ ps.setTrigger(TriggerStart.SOFTWARE)
 
 
 #--------------------- PARAMETERS-------------------------
+tau_second_lockin_ns=0.5e9
 tau_ref_ns=2.5e-3*1e9 # 15 ms for fig 3, 2.5 ms for fig 4
 tau_i_ns=5e-6*1e9 # laser initialization/readout pulse width
 number_of_cycles=200 # default 33 fig 3, 200 fig 4; sets how long each pulse pattern is for a given delay
@@ -59,9 +60,12 @@ print(f"tau_padding_after_mw_ns: {tau_padding_after_mw_ns}")
 print(f"n_repeats: {n_repeats}")
 
 
-
+# Create sequence object 
+seq = ps.createSequence()
 create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
+# Set channel 0 as refrence (pulse duration in nanoseconds)
 
+#create_fig4_teachingpaper_pulse_sequence_doublelockin(tau_second_lockin_ns,tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
 # Count down from 10
 #print("Countdown....")
 #for i in range(10, 0, -1):

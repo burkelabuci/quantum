@@ -123,9 +123,6 @@ from Burkelab_Filenaming import create_folder_and_generate_filename_lockin,creat
 import pyvisa
 
 
-lockin_parameters_text_name = create_folder_and_generate_filename_lockin()  # Generate unique filename with name SR830_lockinmmddyy
-
-
 plotname = create_folder_and_generate_filename_csv()# Generate unique filename with name mm/dd/yy (eg. 070324)
 
 
@@ -133,15 +130,16 @@ plotname = create_folder_and_generate_filename_csv()# Generate unique filename w
 #--------------------- PARAMETERS-------------------------
 
 # for both fig 3 and fig 4 and fig 5 and 6
-fig_mode=4 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
+fig_mode=3# 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
 channel_number_ref=0
 channel_number_pulse=1
 channel_number_laser_pulse=1 # same thing as channel_number_pulse
 channel_number_mw_pulse=2
 channel_number_mw_phaseshifted_pulse=3
+channel_number_gating_pulses=4
 
-tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4. and 5 and 6
-number_of_cycles=200# number of reference cycles for each data point
+tau_ref_ns=15e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4. and 5 and 6
+number_of_cycles=33# number of reference cycles for each data point
 # default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4, 5
 # for fig 4 200 Hz default, so want 200 cycles if 1 second between each point
 step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds, how long each data point has pulses going
@@ -159,7 +157,7 @@ delay_number_of_points=50
 
 # for Fig 4, 5, 6
 tau_laser_ns=5e-6*1e9 # laser pulse width, fig 4, 5
-n_repeats=200 # number of times pattern repeated within a cycle; suggest 200 fig 4, 100 fig 5
+n_repeats=100 # number of times pattern repeated within a cycle; suggest 200 fig 4, 100 fig 5
 rabi_and_hahn_delay_s=2 # delay after setting new microwave pulse time to reading LIA output; can be 2 seconds for fig 4
 
 # Fig 4 only:
@@ -169,23 +167,23 @@ tau_padding_after_mw_ns=1000e-9*1e9 # time between end of mw pulse and start of 
 tau_mw_ns=5e-6*1e9 # not used
 # Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
 mw_pulse_length_start_ns=1e-9*1e9
-mw_pulse_length_stop_ns=200e-9*1e9
+mw_pulse_length_stop_ns=3000e-9*1e9
 mw_pulse_length_number_of_points=200
 
 # Fig 5, 6 only:
-tau_mw_X_pi_over_2_ns=50e-9*1e9 # pi/2 pulse X length (fig 5)
+tau_mw_X_pi_over_2_ns=20e-9*1e9 # pi/2 pulse X length (fig 5)
 tau_mw_X_pi_ns=2*tau_mw_X_pi_over_2_ns # pi pulse X length (fig 5)
 tau_mw_Y_pi_ns=tau_mw_X_pi_ns # pi/2 pulse Y length (fig 5)
 tau_padding_before_mw_pi_over_2_ns=1000e-9*1e9 # time between end of laser pulse and start of first mw X pi/2 pulse (fig 5)
 tau_padding_after_mw_pi_over_2_ns=1000e-9*1e9 # time between end  of second mw X pi/2 pulse and start of next laser pulse (fig 5)
 # Fig 5,6 will vary T_delay between mw_T_delay_length_start_ns and mw_T_delay_length_stop_ns and measure LIA at each point
 mw_T_delay_length_start_ns=100e-9*1e9
-mw_T_delay_length_stop_ns=500e-9*1e9
-mw_T_delay_length_number_of_points=3
+mw_T_delay_length_stop_ns=5000e-9*1e9
+mw_T_delay_length_number_of_points=100
 mw_T_delay_delay_s=2 # delay after setting new microwave pulse time to reading LIA output
 
 # Fig 6 only:
-N_CPMG=4 # number of CPMG refocusing pulses
+N_CPMG=6 # number of CPMG refocusing pulses
 
 #--------------------- INITIALIZE PULSEBLASTER-------------------------
 PB_IPADDRESS= '169.254.8.2'
@@ -229,7 +227,7 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 
 
 
-#do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
+#do_it_all(channel_number_ref,channel_number_pulse,channel_number_gating_pulses,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 
 #do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
@@ -237,23 +235,29 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 
 #rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
 
-sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+#sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_gating_pulses,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
 
 
 #sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
-#                              tau_ref_ns,tau_laser_ns,
-#                              tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
-#                              mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
-#                              tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
-#                              n_repeats,number_of_cycles,ps)
+                             # tau_ref_ns,tau_laser_ns,
+                             #tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
+                           # mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
+                              #tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
+                             #n_repeats,number_of_cycles,ps)
+#sequences=Hahn_many_sequences_XYX(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
+                              #tau_ref_ns,tau_laser_ns,
+                             #tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
+                            #mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
+                              #tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
+                            # n_repeats,number_of_cycles,ps)
 
 #sequences=CPMG_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
-#                              tau_ref_ns,tau_laser_ns,
-#                              tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
-#                              mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
-#                              tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
-#                              N_CPMG,
-#                              n_repeats,number_of_cycles,ps)
+                              #tau_ref_ns,tau_laser_ns,
+                              #tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
+                              #mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
+                              #tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
+                              #N_CPMG,
+                              #n_repeats,number_of_cycles,ps)
 
 #print("T1_Decay_Synchronized.py:  -----------------------------")
 print("T1_Decay_Synchronized.py: sequences created")
@@ -331,7 +335,9 @@ print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 
 if(fig_mode==3):
+    
     ps.startNow()
+
     for tau in delays:
         try:
             # Query the CH1 display value from the Lock-In Amplifier
@@ -409,8 +415,6 @@ df = pd.DataFrame(pairs, columns=columns)
 # Save DataFrame to CSV
 csv_filepath = plotname  # using plotname as the CSV filename
 df.to_csv(csv_filepath, sep=",")  # save CSV without index
-
-print(f'Data file has been saved to {plotname}')
 
 # Get the lock-in parameters and prepare them for adding to the DataFrame
 parameters = write_parameters_to_file(plotname, parameters)

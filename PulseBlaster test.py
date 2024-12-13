@@ -24,24 +24,23 @@ PB_IPADDRESS= '169.254.8.2'
 
 ps = PulseStreamer(PB_IPADDRESS)
 
-tau_ref = 1 # reference time in seconds ; default 15e-3
-#tau_ref = 15e-3 # reference time in seconds ; default 15e-3
-tau_i = 1e-6 # pulse time in seconds (initialize, readout) ; default 5e-6
-tau_delay =1e-3 # delay between initialize and readout in seconds; default 1e-3
+tau_ref = 0.5e-3 # reference time in seconds ; default 15e-3
+tau_ref_ns = tau_ref*1e9 # reference time in seconds ; default 15e-3
 
-tau_ref_ns=tau_ref*1E9
-tau_i_ns=tau_i*1E9
-tau_delay_ns=tau_delay*1E9
+
 
 # Create sequence object 
 seq = ps.createSequence()
 
 # Set channel 0 as refrence (pulse duration in nanoseconds)
-seq.setDigital(2, [(tau_ref_ns, 1), (tau_ref_ns, 0)])
+seq.setDigital(0, [(tau_ref_ns, 1), (tau_ref_ns, 0),(tau_ref_ns, 1),(tau_ref_ns, 0)])
+seq.setDigital(1, [(tau_ref_ns, 1), (tau_ref_ns, 0),(tau_ref_ns, 1),(tau_ref_ns, 0)])
+seq.setDigital(2, [(tau_ref_ns, 1), (tau_ref_ns, 0),(tau_ref_ns, 1),(tau_ref_ns, 0)])
+seq.setDigital(3, [(tau_ref_ns, 1), (tau_ref_ns, 0),(tau_ref_ns, 1),(tau_ref_ns, 0)])
 
 # Set channel 1 as the laser pulse sequence (pulse duration in nanoseconds)
 #seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),((tau_i_ns), 1),((tau_delay_ns),0),((tau_i_ns), 1), ((tau_ref_ns-2*tau_i_ns-tau_delay_ns), 0)])
-seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0)])
+#seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0)])
  
 ps.stream(seq)  # runs forever , but returns program
 
