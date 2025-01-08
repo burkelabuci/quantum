@@ -33,10 +33,11 @@ tau_ref_ns = tau_ref*1e9 # reference time in seconds ; default 15e-3
 seq = ps.createSequence()
 
 # Set channel 0 as refrence (pulse duration in nanoseconds)
-seq.setDigital(0, [(tau_ref_ns, 1), (tau_ref_ns, 0),(tau_ref_ns, 1),(tau_ref_ns, 0)])
-seq.setDigital(1, [(tau_ref_ns, 1), (tau_ref_ns, 0),(tau_ref_ns, 1),(tau_ref_ns, 0)])
-seq.setDigital(2, [(tau_ref_ns, 1), (tau_ref_ns, 0),(tau_ref_ns, 1),(tau_ref_ns, 0)])
-seq.setDigital(3, [(tau_ref_ns, 1), (tau_ref_ns, 0),(tau_ref_ns, 1),(tau_ref_ns, 0)])
+seq.setDigital(0,[(2500000,1),(2500000,0),(2500000,1),(2500000,0)])
+seq.setDigital(1,[(5000,1),(5000,0),(5000,1),(5000,0)])
+seq.setDigital(2, [(5000,0),(5000,1),(5000,0),(5000,1)])
+seq.setDigital(3,[(10000,0),(5000,1),(10000,0),(5000,1)])
+
 
 # Set channel 1 as the laser pulse sequence (pulse duration in nanoseconds)
 #seq.setDigital(1, [(tau_i_ns, 1), ((tau_ref_ns-tau_i_ns), 0),((tau_i_ns), 1),((tau_delay_ns),0),((tau_i_ns), 1), ((tau_ref_ns-2*tau_i_ns-tau_delay_ns), 0)])

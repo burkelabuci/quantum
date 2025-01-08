@@ -1,19 +1,3 @@
-# Program name Chopped_ODMR_SRS_DS345.py
-
-# 6/27/2024
-# Author Minghao
-# From reference paper:
-# Sewani, Vikas K., Hyma H. Vallabhapurapu, Yang Yang, Hannes R. Firgau, Chris Adambukulam, 
-# Brett C. Johnson, Jarryd J. Pla, and Arne Laucht. 
-# "Coherent control of NV− centers in diamond in a quantum teaching lab." American Journal of Physics 88, no. 12 (2020): 1156-1169.
-
-
-# This code sweep the microwave frequency from start_frequency to stop_frequency
-# then extract the voltage reading from Labjack T7, , then plot frequencies (HZ) vs Labjack Voltage (v)
-# Compared with the program named Signal Generator ODMR V2, this program will plot the frequencies in Hz instead of MHz
-
- 
-
 #import libraries
 import threading
 from labjack import ljm
@@ -26,7 +10,7 @@ from datetime import datetime, timedelta
 import time
 from datetime import datetime
 import os
-from main import *
+
 from SR830lockin_settings_achieve import query_lockin_parameters, write_parameters_to_file
 from Burkelab_Filenaming import create_folder_and_generate_filename_lockin,create_folder_and_generate_filename_csv
 import nidaqmx
@@ -35,51 +19,38 @@ import pyvisa
 
 
 #Parameters for the microwave:
-start_frequency = 2700 #in MHz
-stop_frequency = 3000 #in MHz
+start_frequency = 2800 #in MHz
+stop_frequency = 2950 #in MHz
 
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(1000) #in milliseconds
+step_time = int(2000) #in milliseconds
 step_time_s = float(step_time/1000) #in seconds
-sampling_rate = 1/step_time_s #sampling rate for counter in Hz
-loopAmount= stop_frequency-start_frequency #how many points to sweep
 plotname = create_folder_and_generate_filename_csv()# Generate unique filename with name mm/dd/yy (eg. 070324)
 
 #arrays that will be used for plot
 frequencies= []
-
-freq_num= [i * 1e6 for i in range(start_frequency, stop_frequency, step_size)]
+intensities= []
+freq_num= [i * 1e3 for i in range(start_frequency, stop_frequency, step_size)]
 print(f"Unique filename: {plotname}")
-
 
 print("\n \t \t Qubit initialization Process; ODMR Single Plot \n \n")
 
 print("\t \t Initializing Systems \n \n")
 
-#______________________________________________________________________________________________________________
-#__________________________________________initialize the USB-6453 DAQ Counter__________________________________
-
-#______________________________________________________________________________________________________________
-
 #Microwave VCO initialization
 synth = SynthHD("COM3")
 print("\t \t Set Parameters \n \n")
-
-
 synth.write("sweep_freq_low", start_frequency)
-
 print("Starting sweeping")
-
-
 synth.write("sweep_freq_high",stop_frequency)
 print("Frequency high set")
-
 synth.write("sweep_freq_step",step_size)
 print("Frequency step set")
-
 synth.write("sweep_time_step", step_time)
 print("Frequency time set")
 
+
+print(f"Unique filename: {step_time_s}")
 
 
 # Get the current time
@@ -95,47 +66,40 @@ print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"
 print("Starting collecting")
 
 
-#define intensity array
-intensities= []
 
-
-synth.write("sweep_single",True)
-print("Actual sweep once true")
 
 with nidaqmx.Task() as task:
+    # Create a counter channel to count rising edges
     channel = task.ci_channels.add_ci_count_edges_chan(
         "Dev1/ctr0",
         edge=Edge.RISING,
         initial_count=0,
         count_direction=CountDirection.COUNT_UP,
     )
-    task.timing.cfg_samp_clk_timing(
-        1000000, source="/Dev1/PFI9", sample_mode=AcquisitionType.CONTINUOUS 
-    )
     channel.ci_count_edges_term = "/Dev1/PFI8"
 
-    print("Start counting. Press Ctrl+C to stop.")
-    task.start()
+    print("Continuously polling. Press Ctrl+C to stop.")
     
-#loop over and read the signal from the Labjack T7 and append the value to the intensity array
-    j=0
-    while True:
-        try:
-            current_frequency = synth.read("frequency")
-            edge_counts = task.read(number_of_samples_per_channel=100)
-            print(j,current_frequency,edge_counts[-1])
-            frequencies.append(current_frequency*1e3)
-            intensities.append(edge_counts[-1])
-            if loopAmount != "infinite":
-                j=j+1
-            if j>= loopAmount:
-                break
-        except KeyboardInterrupt:
-            pass
-        finally:
+    try:
+        synth.write("sweep_single",True)
+        while True:
+            edge_counts = 0
+            current_frequency = synth.read("frequency") 
+            task.start()
+            time.sleep(step_time_s)
+            edge_counts = task.read()
             task.stop()
-
-
+            print(current_frequency,edge_counts)
+            frequencies.append(current_frequency*1e3)
+            intensities.append(edge_counts)
+            if current_frequency >=freq_num[-1]:
+                break
+    except KeyboardInterrupt:
+        pass
+    finally:
+        task.stop()
+        print(f"\nAcquired {edge_counts:n} total counts.")
+        
 #save the data ie, frequency and intensity as a csv file
 saved_dict= {
     "frequencies (Hz)": frequencies,
@@ -145,10 +109,6 @@ saved_dict= {
 df= pd.DataFrame(saved_dict)
 csv_filepath = plotname  # using plotname as the CSV filename
 df.to_csv(csv_filepath, sep=",")  # save CSV without index
-
-
-
-
 
 
 print(f'Data file has been saved to {plotname}')
@@ -170,8 +130,3 @@ plt.tight_layout()
 
 # Display the plot
 plt.show()
-
-# Return the microwave to the start frequency
-print("Returning microwave to the start frequency...")
-synth.write("frequency",start_frequency)
-print("Microwave frequency reset complete.")

@@ -43,9 +43,11 @@ tau_delay_ns=1e-3*1e9 # fig 3 only
 tau_laser_ns=5e-6*1e9
 tau_mw_ns=5e-6*1e9
 tau_padding_ns=1e-6*1e9
-n_repeats=175 # 250  but with padding must be less
+n_repeats=200 # 250  but with padding must be less
 tau_padding_before_mw_ns=1000e-9*1e9
 tau_padding_after_mw_ns=1000e-9*1e9
+tau_gate_on_ns=1000e-9*1e9
+tau_gate_off_ns=3000e-9*1e9
 
 #create_fig3_teachingpaper_pulse_sequence(tau_ref_ns,tau_i_ns,tau_delay_ns,ps)
 #create_fig3_teachingpaper_pulse_sequence_no_init_pulse(tau_ref_ns,tau_i_ns,tau_delay_ns,ps)
@@ -62,8 +64,10 @@ print(f"n_repeats: {n_repeats}")
 
 # Create sequence object 
 seq = ps.createSequence()
-create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
+#(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
 # Set channel 0 as refrence (pulse duration in nanoseconds)
+
+create_fig4_teachingpaper_pulse_sequence_SPD(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,tau_gate_on_ns,tau_gate_off_ns,n_repeats,ps)
 
 #create_fig4_teachingpaper_pulse_sequence_doublelockin(tau_second_lockin_ns,tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
 # Count down from 10
@@ -80,3 +84,4 @@ ps.startNow()
 
 
 
+ 

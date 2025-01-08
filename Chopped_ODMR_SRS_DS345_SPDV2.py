@@ -35,13 +35,11 @@ import pyvisa
 
 
 #Parameters for the microwave:
-start_frequency = 2700 #in MHz
-stop_frequency = 3000 #in MHz
+start_frequency = 2400 #in MHz
+stop_frequency = 3200 #in MHz
 
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(1000) #in milliseconds
-step_time_s = float(step_time/1000) #in seconds
-sampling_rate = 1/step_time_s #sampling rate for counter in Hz
+step_time = int(300) #in milliseconds
 loopAmount= stop_frequency-start_frequency #how many points to sweep
 plotname = create_folder_and_generate_filename_csv()# Generate unique filename with name mm/dd/yy (eg. 070324)
 
@@ -89,7 +87,7 @@ print("Current time:", current_time.strftime("%Y-%m-%d %H:%M:%S"))
 
 number_of_elements = len(freq_num)
 print("Number of elements in frequencies:", number_of_elements)
-time_to_complete_seconds=number_of_elements*step_time*1e-3/2
+time_to_complete_seconds=number_of_elements*step_time*1e-3
 completion_time = current_time + timedelta(seconds=time_to_complete_seconds)
 print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"))
 print("Starting collecting")
@@ -109,23 +107,22 @@ with nidaqmx.Task() as task:
         initial_count=0,
         count_direction=CountDirection.COUNT_UP,
     )
-    task.timing.cfg_samp_clk_timing(
-        1000000, source="/Dev1/PFI9", sample_mode=AcquisitionType.CONTINUOUS 
-    )
     channel.ci_count_edges_term = "/Dev1/PFI8"
 
-    print("Start counting. Press Ctrl+C to stop.")
+    print("Continuously polling. Press Ctrl+C to stop.")
     task.start()
     
 #loop over and read the signal from the Labjack T7 and append the value to the intensity array
     j=0
     while True:
         try:
+            edge_counts = 0
             current_frequency = synth.read("frequency")
-            edge_counts = task.read(number_of_samples_per_channel=100)
-            print(j,current_frequency,edge_counts[-1])
+            edge_counts = task.read()
+            print(j,current_frequency,edge_counts)
             frequencies.append(current_frequency*1e3)
-            intensities.append(edge_counts[-1])
+            intensities.append(edge_counts)
+            time.sleep(0.3)
             if loopAmount != "infinite":
                 j=j+1
             if j>= loopAmount:
