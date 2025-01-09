@@ -458,7 +458,7 @@ def create_fig4_teachingpaper_pulse_sequence_repeated(channel_number_ref,channel
     
     #*********** THEN PULSE CYCLE Gating***********************
     
-    pulse_patt_gating=create_fig_4_gating_pattern_array_rounded_to_8_ns_version_2(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, n_repeats,number_of_cycles)
+    pulse_patt_gating=create_fig_4_gating_pattern_array_rounded_to_8_ns_version_2(tau_ref_ns, tau_laser_ns, tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns, tau_laser_ns, tau_laser_ns, n_repeats,number_of_cycles)
     seq.setDigital(channel_number_gating_pulses, pulse_patt_gating)
     
     return seq

@@ -186,6 +186,7 @@ N_CPMG=4 # number of CPMG refocusing pulses
 PB_IPADDRESS= '169.254.8.2'
 
 ps = PulseStreamer(PB_IPADDRESS)
+print(f"PulseStreamer initialized: {ps}")
 
 
 #ps.setTrigger(TriggerStart.SOFTWARE)
@@ -218,8 +219,8 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 #do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 #rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
-
-sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+print(f"ps before function call: {ps}")
+sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_gating_pulses,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
 
 
 #sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
@@ -319,33 +320,33 @@ if(fig_mode==6): # same as fig 5, varies tdelay
 
 
 
-if(fig_mode==3):
-    ps.startNow()
-    with nidaqmx.Task() as task:
-        channel = task.ci_channels.add_ci_count_edges_chan(
-            "Dev1/ctr0",
-            edge=Edge.RISING,
-            initial_count=0,
-            count_direction=CountDirection.COUNT_UP,
-        )
-        channel.ci_count_edges_term = "/Dev1/PFI8"
+# if(fig_mode==3):
+#     ps.startNow()
+#     with nidaqmx.Task() as task:
+#         channel = task.ci_channels.add_ci_count_edges_chan(
+#             "Dev1/ctr0",
+#             edge=Edge.RISING,
+#             initial_count=0,
+#             count_direction=CountDirection.COUNT_UP,
+#         )
+#         channel.ci_count_edges_term = "/Dev1/PFI8"
 
-        print("Start counting. Press Ctrl+C to stop.")
+#         print("Start counting. Press Ctrl+C to stop.")
     
-        for tau in delays:
-            try:
-                edge_counts = 0
-                task.start()
-                time.sleep(step_time)
-                edge_counts = task.read()
-                task.stop()
-                print(tau,edge_counts)
-                pairs.append((tau,edge_counts))
+#         for tau in delays:
+#             try:
+#                 edge_counts = 0
+#                 task.start()
+#                 time.sleep(step_time)
+#                 edge_counts = task.read()
+#                 task.stop()
+#                 print(tau,edge_counts)
+#                 pairs.append((tau,edge_counts))
             
-            except KeyboardInterrupt:
-                pass
-            finally:
-                task.stop()
+#             except KeyboardInterrupt:
+#                 pass
+#             finally:
+#                 task.stop()
 
 num_points=len(delays)
 i=0
@@ -376,9 +377,9 @@ if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
         print("Start counting. Press Ctrl+C to stop.")
 
 
-    for sequence, tau in zip(sequences, delays):
+        for sequence, tau in zip(sequences, delays):
 
-        try:
+            try:
                 edge_counts = 0
                 ps.stream(sequence)
                 ps.startNow()
@@ -388,13 +389,13 @@ if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
                 task.stop()
                 print(tau,edge_counts)
                 pairs.append((tau,edge_counts))
-                x=abs(edge_counts[0])
+                x=abs(edge_counts)
                 print(i,int(tau),f"{x:.3f}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
-                print(tau,abs(edge_counts[0]))
+                print(tau,abs(edge_counts))
                 i=i+1
-        except KeyboardInterrupt:
+            except KeyboardInterrupt:
                 pass
-        finally:
+            finally:
                 task.stop()
     
 #--------------------- DISPLAY DATA AND SAVE TO FILE-------------------------
@@ -417,18 +418,6 @@ df = pd.DataFrame(pairs, columns=columns)
 # Save DataFrame to CSV
 csv_filepath = plotname  # using plotname as the CSV filename
 df.to_csv(csv_filepath, sep=",")  # save CSV without index
-
-# Get the lock-in parameters and prepare them for adding to the DataFrame
-parameters = write_parameters_to_file(plotname, parameters)
-
-# Convert parameters dictionary to DataFrame
-params_df = pd.DataFrame([parameters])
-
-# Concatenate the DataFrame with parameters DataFrame horizontally
-df_with_params = pd.concat([df, params_df], axis=1)
-
-# Save the combined DataFrame to CSV
-df_with_params.to_csv(csv_filepath , sep=",")  # save CSV with index
 
 print(f'Data file has been saved to {plotname}')
 

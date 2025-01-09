@@ -23,7 +23,7 @@ start_frequency = 2800 #in MHz
 stop_frequency = 2950 #in MHz
 
 step_size = int(1) # specing between each frequency point in MHz
-step_time = int(2000) #in milliseconds
+step_time = int(500) #in milliseconds
 step_time_s = float(step_time/1000) #in seconds
 plotname = create_folder_and_generate_filename_csv()# Generate unique filename with name mm/dd/yy (eg. 070324)
 
