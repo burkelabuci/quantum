@@ -240,9 +240,10 @@ pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), 
 
 seq = ps.createSequence()
 seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
-seq.setDigital(channel_number_mw_pulse, pulse_patt_laser)
-seq.setDigital(channel_number_gating_pulses, pulse_patt_laser)
+seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
+seq.setDigital(channel_number_gating_pulses, pulse_patt_SPD_gate)
 ps.stream(seq)
+
 input('Press enter')
 #sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
                              #tau_ref_ns,tau_laser_ns,
