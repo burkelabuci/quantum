@@ -220,13 +220,7 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 
 #rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
 
-#sequences=rabi_many_sequences_SPD(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_gating_pulses,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
-
-mw_pulse_lengths_ns = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
-mw_pulse_lengths_ns = np.round(mw_pulse_lengths_ns).astype(int)
-print("rabi_many_sequences: mw_pulse_lengths_ns=")
-print(mw_pulse_lengths_ns)
-
+#sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_gating_pulses,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
 
 tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
 tau_padding_before_mw_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
@@ -234,15 +228,33 @@ tau_padding_after_mw_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
 tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
 tau_laser_off_ns_rounded=tau_padding_before_mw_ns_rounded+tau_mw_ns_rounded+tau_padding_after_mw_ns_rounded  
 
-pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
-pulse_patt_mw = [(tau_laser_ns_rounded, 0),(tau_padding_before_mw_ns_rounded, 0), (tau_mw_ns_rounded, 1), (tau_padding_after_mw_ns_rounded, 0), (tau_laser_ns_rounded, 0), (tau_laser_off_ns_rounded, 0)]
-pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
 
-seq = ps.createSequence()
-seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
-seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
-seq.setDigital(channel_number_gating_pulses, pulse_patt_SPD_gate)
-ps.stream(seq)
+mw_pulse_lengths_ns = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
+mw_pulse_lengths_ns = np.round(mw_pulse_lengths_ns).astype(int)
+print("rabi_many_sequences: mw_pulse_lengths_ns=")
+print(mw_pulse_lengths_ns)
+
+pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+sequences=[]
+tau_mw_varibale=[]
+
+for mw_pulse_length_ns in mw_pulse_lengths_ns:
+    mw_pulse_length_ns_rounded=round_to_nearest_8ns(mw_pulse_length_ns)
+    pulse_patt_mw = [(tau_laser_ns_rounded, 0),(tau_padding_before_mw_ns_rounded, 0), (mw_pulse_length_ns_rounded, 1), (tau_padding_after_mw_ns_rounded, 0), (tau_laser_ns_rounded, 0), (tau_laser_off_ns_rounded, 0)]
+    print(pulse_patt_mw)
+    seq = ps.createSequence()
+    seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
+    seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
+    seq.setDigital(channel_number_gating_pulses, pulse_patt_SPD_gate)
+    sequences.append(seq)
+    tau_mw_varibale.append(mw_pulse_length_ns_rounded)
+
+#seq = ps.createSequence()
+#seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
+#seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
+#seq.setDigital(channel_number_gating_pulses, pulse_patt_SPD_gate)
+#ps.stream(seq)
 
 input('Press enter')
 #sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
@@ -399,7 +411,7 @@ if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
         print("Start counting. Press Ctrl+C to stop.")
 
 
-        for sequence, tau in zip(sequences, delays):
+        for sequence, tau in zip(sequences, tau_mw_varibale):
 
             try:
                 edge_counts = 0
