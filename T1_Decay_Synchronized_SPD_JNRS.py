@@ -219,10 +219,31 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 #do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
 
 #rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
-print(f"ps before function call: {ps}")
-sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_gating_pulses,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+
+#sequences=rabi_many_sequences_SPD(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_gating_pulses,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
+
+mw_pulse_lengths_ns = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
+mw_pulse_lengths_ns = np.round(mw_pulse_lengths_ns).astype(int)
+print("rabi_many_sequences: mw_pulse_lengths_ns=")
+print(mw_pulse_lengths_ns)
 
 
+tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
+tau_padding_before_mw_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
+tau_padding_after_mw_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
+tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
+tau_laser_off_ns_rounded=tau_padding_before_mw_ns_rounded+tau_mw_ns_rounded+tau_padding_after_mw_ns_rounded  
+
+pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+pulse_patt_mw = [(tau_laser_ns_rounded, 0),(tau_padding_before_mw_ns_rounded, 0), (tau_mw_ns_rounded, 1), (tau_padding_after_mw_ns_rounded, 0), (tau_laser_ns_rounded, 0), (tau_laser_off_ns_rounded, 0)]
+pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+
+seq = ps.createSequence()
+seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
+seq.setDigital(channel_number_mw_pulse, pulse_patt_laser)
+seq.setDigital(channel_number_gating_pulses, pulse_patt_laser)
+
+input('Press enter')
 #sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
                              #tau_ref_ns,tau_laser_ns,
                               #tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
