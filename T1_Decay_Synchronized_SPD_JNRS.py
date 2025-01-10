@@ -158,14 +158,14 @@ n_repeats=200 # number of times pattern repeated within a cycle; suggest 200 fig
 rabi_and_hahn_delay_s=2 # delay after setting new microwave pulse time to reading LIA output; can be 2 seconds for fig 4
 
 # Fig 4 only:
-tau_padding_ns=1e-6*1e9 # not used for now
-tau_padding_before_mw_ns=1000e-9*1e9 # time between end of laser pulse and start of mw pulse (fig 4)
-tau_padding_after_mw_ns=1000e-9*1e9 # time between end of mw pulse and start of laser pulse (fig 4)
-tau_mw_ns=5e-6*1e9 # not used
+#tau_padding_ns=1e-6*1e9 # not used for now
+#tau_padding_before_mw_ns=1000e-9*1e9 # time between end of laser pulse and start of mw pulse (fig 4)
+#tau_padding_after_mw_ns=1000e-9*1e9 # time between end of mw pulse and start of laser pulse (fig 4)
+#tau_mw_ns=5e-6*1e9 # not used
 # Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
-mw_pulse_length_start_ns=2000e-9*1e9
-mw_pulse_length_stop_ns=3000e-9*1e9
-mw_pulse_length_number_of_points=10
+mw_pulse_length_start_ns=20
+mw_pulse_length_stop_ns=3000
+mw_pulse_length_number_of_points=50
 
 # Fig 5, 6 only:
 tau_mw_X_pi_over_2_ns=50e-9*1e9 # pi/2 pulse X length (fig 5)
@@ -223,10 +223,10 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 #sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_gating_pulses,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
 
 tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
-tau_padding_before_mw_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
-tau_padding_after_mw_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
-tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
-tau_laser_off_ns_rounded=tau_padding_before_mw_ns_rounded+tau_mw_ns_rounded+tau_padding_after_mw_ns_rounded  
+#tau_padding_before_mw_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
+#tau_padding_after_mw_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
+#tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
+
 
 
 mw_pulse_lengths_ns = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
@@ -234,14 +234,18 @@ mw_pulse_lengths_ns = np.round(mw_pulse_lengths_ns).astype(int)
 print("rabi_many_sequences: mw_pulse_lengths_ns=")
 print(mw_pulse_lengths_ns)
 
-pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
-pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+
 sequences=[]
 tau_mw_varibale=[]
 
 for mw_pulse_length_ns in mw_pulse_lengths_ns:
     mw_pulse_length_ns_rounded=round_to_nearest_8ns(mw_pulse_length_ns)
+    tau_padding_before_mw_ns_rounded=round_to_nearest_8ns((tau_laser_ns_rounded-mw_pulse_length_ns_rounded)/2)
+    tau_padding_after_mw_ns_rounded=tau_padding_before_mw_ns_rounded
+    tau_laser_off_ns_rounded=tau_padding_before_mw_ns_rounded+mw_pulse_length_ns_rounded+tau_padding_after_mw_ns_rounded  
     pulse_patt_mw = [(tau_laser_ns_rounded, 0),(tau_padding_before_mw_ns_rounded, 0), (mw_pulse_length_ns_rounded, 1), (tau_padding_after_mw_ns_rounded, 0), (tau_laser_ns_rounded, 0), (tau_laser_off_ns_rounded, 0)]
+    pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+    pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
     print(pulse_patt_mw)
     seq = ps.createSequence()
     seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
