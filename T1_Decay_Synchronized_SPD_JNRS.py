@@ -128,27 +128,17 @@ plotname = create_folder_and_generate_filename_csv()# Generate unique filename w
 
 # for both fig 3 and fig 4 and fig 5 and 6
 fig_mode=4 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
-channel_number_ref=0
-channel_number_pulse=1
 channel_number_laser_pulse=1 # same thing as channel_number_pulse
 channel_number_mw_pulse=2
-channel_number_mw_phaseshifted_pulse=3
-channel_number_gating_pulses=4
-
-tau_ref_ns=15e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4. and 5 and 6
-number_of_cycles=33# number of reference cycles for each data point
-# default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4, 5
-# for fig 4 200 Hz default, so want 200 cycles if 1 second between each point
-step_time=number_of_cycles*2*tau_ref_ns*1e-9 # in seconds, how long each data point has pulses going
-step_time_microseconds=step_time*1e6
+channel_number_gate_pulse=4
 
 # Fig 3 only
 tau_i_ns=5e-6*1e9 # laser initialization pulse width
 #tau_readout_ns=tau_i_ns # laser readout pulse width
 tau_readout_ns=5e-6*1e9 # laser readout pulse width
 # Fig 3 will vary delay between laser init and laser readout pulse between delay_start_s and delay_stop_s and measure the LIA at each point.
-delay_start_s=3e-3
-delay_stop_s=0.01e-3
+delay_start_s=0.1e-3
+delay_stop_s=5e-3
 delay_number_of_points=50
 
 
@@ -197,12 +187,9 @@ print(f"PulseStreamer initialized: {ps}")
 
 
 print("T1_Decay_Synchronized.py: calling function with these parameters:")
-print(f"T1_Decay_Synchronized.py: channel_number_ref: {channel_number_ref}")
-print(f"T1_Decay_Synchronized.py: channel_number_pulse: {channel_number_pulse}")
-print(f"T1_Decay_Synchronized.py: tau_ref_ns: {tau_ref_ns}")
+print(f"T1_Decay_Synchronized.py: channel_number_pulse: {channel_number_laser_pulse}")
 print(f"T1_Decay_Synchronized.py: tau_i_ns: {tau_i_ns}")
 print(f"T1_Decay_Synchronized.py: tau_readout_ns: {tau_readout_ns}")
-print(f"T1_Decay_Synchronized.py: number_of_cycles: {number_of_cycles}")
 print(f"T1_Decay_Synchronized.py: (fig 3 only) delay_start_s: {delay_start_s}")
 print(f"T1_Decay_Synchronized.py: (fig 3 only) delay_stop_s: {delay_stop_s}")
 print(f"T1_Decay_Synchronized.py: (fig 3 only) delay_number_of_points: {delay_number_of_points}")
@@ -211,85 +198,48 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_stop_ns: {mw_puls
 print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points: {mw_pulse_length_number_of_points}")
 
 
-
-#do_it_all(channel_number_ref,channel_number_pulse,channel_number_gating_pulses,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-#do_it_all_SPD(channel_number_ref,channel_number_pulse,channel_number_gating_pulses,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-
-#do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-#do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-
-#rabi(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_ns,n_repeats,number_of_cycles,ps)
-
-#sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_gating_pulses,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
-
 tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
-#tau_padding_before_mw_ns_rounded=round_to_nearest_8ns(tau_padding_before_mw_ns)
-#tau_padding_after_mw_ns_rounded=round_to_nearest_8ns(tau_padding_after_mw_ns)
-#tau_mw_ns_rounded=round_to_nearest_8ns(tau_mw_ns)
 
+#T1 measurement
+tau_delay_lengths_ns = np.linspace(delay_start_s, delay_stop_s,delay_number_of_points)*1e9
+tau_delay_lengths_ns = np.round(tau_delay_lengths_ns).astype(int)
 
-
+#Rabi Oscillations
 mw_pulse_lengths_ns = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
 mw_pulse_lengths_ns = np.round(mw_pulse_lengths_ns).astype(int)
 print("rabi_many_sequences: mw_pulse_lengths_ns=")
 print(mw_pulse_lengths_ns)
 
-
 sequences=[]
-tau_mw_varibale=[]
+tau_mw_variable=[]
+tau_laser_variable=[]
 
-for mw_pulse_length_ns in mw_pulse_lengths_ns:
-    mw_pulse_length_ns_rounded=round_to_nearest_8ns(mw_pulse_length_ns)
-    tau_padding_before_mw_ns_rounded=round_to_nearest_8ns((tau_laser_ns_rounded-mw_pulse_length_ns_rounded)/2)
-    tau_padding_after_mw_ns_rounded=tau_padding_before_mw_ns_rounded
-    tau_laser_off_ns_rounded=tau_padding_before_mw_ns_rounded+mw_pulse_length_ns_rounded+tau_padding_after_mw_ns_rounded  
-    pulse_patt_mw = [(tau_laser_ns_rounded, 0),(tau_padding_before_mw_ns_rounded, 0), (mw_pulse_length_ns_rounded, 1), (tau_padding_after_mw_ns_rounded, 0), (tau_laser_ns_rounded, 0), (tau_laser_off_ns_rounded, 0)]
-    pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
-    pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
-    print(pulse_patt_mw)
-    seq = ps.createSequence()
-    seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
-    seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
-    seq.setDigital(channel_number_gating_pulses, pulse_patt_SPD_gate)
-    sequences.append(seq)
-    tau_mw_varibale.append(mw_pulse_length_ns_rounded)
-
-#seq = ps.createSequence()
-#seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
-#seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
-#seq.setDigital(channel_number_gating_pulses, pulse_patt_SPD_gate)
-#ps.stream(seq)
-
-input('Press enter')
-#sequences=Hahn_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
-                             #tau_ref_ns,tau_laser_ns,
-                              #tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
-                              #mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
-                              #tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
-                              #n_repeats,number_of_cycles,ps)
-#sequences=Hahn_many_sequences_XYX(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
-#                              tau_ref_ns,tau_laser_ns,
-#                              tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
-#                              mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
-#                              tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
-#                              n_repeats,number_of_cycles,ps)
-
-#sequences=CPMG_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,channel_number_mw_phaseshifted_pulse,
-#                              tau_ref_ns,tau_laser_ns,
-#                              tau_mw_X_pi_over_2_ns,tau_mw_X_pi_ns,tau_mw_Y_pi_ns,
-#                              mw_T_delay_length_start_ns,mw_T_delay_length_stop_ns,mw_T_delay_length_number_of_points,
-#                              tau_padding_before_mw_pi_over_2_ns,tau_padding_after_mw_pi_over_2_ns,
-#                              N_CPMG,
-#                              n_repeats,number_of_cycles,ps)
-
-#print("T1_Decay_Synchronized.py:  -----------------------------")
-print("T1_Decay_Synchronized.py: sequences created")
-#print("T1_Decay_Synchronized.py:  -----------------------------")
-
-
-#--------------LOOP SETUP----------------------------
-
-
+if(fig_mode==3):
+    for tau_delay_length_ns in tau_delay_lengths_ns:
+        tau_delay_length_ns_rounded=round_to_nearest_8ns(tau_delay_length_ns)
+        pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_delay_length_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_delay_length_ns_rounded, 0)]
+        print(pulse_patt_laser)
+        seq=ps.createSequence()
+        seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
+        sequences.append(seq)
+        tau_laser_variable.append(tau_delay_length_ns_rounded)
+    
+if(fig_mode==4):
+    for mw_pulse_length_ns in mw_pulse_lengths_ns:
+        mw_pulse_length_ns_rounded=round_to_nearest_8ns(mw_pulse_length_ns)
+        tau_padding_before_mw_ns_rounded=round_to_nearest_8ns((tau_laser_ns_rounded-mw_pulse_length_ns_rounded)/2)
+        tau_padding_after_mw_ns_rounded=tau_padding_before_mw_ns_rounded
+        tau_laser_off_ns_rounded=tau_padding_before_mw_ns_rounded+mw_pulse_length_ns_rounded+tau_padding_after_mw_ns_rounded  
+        pulse_patt_mw = [(tau_laser_ns_rounded, 0),(tau_padding_before_mw_ns_rounded, 0), (mw_pulse_length_ns_rounded, 1), (tau_padding_after_mw_ns_rounded, 0), (tau_laser_ns_rounded, 0), (tau_laser_off_ns_rounded, 0)]
+        pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+        pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+        print(pulse_patt_mw)
+        seq=ps.createSequence()
+        seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
+        seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
+        seq.setDigital(channel_number_gate_pulse, pulse_patt_SPD_gate)
+        sequences.append(seq)
+        tau_mw_variable.append(mw_pulse_length_ns_rounded)
 
 # Initialize the data array
 # Initialize an empty list to store the pairs (i, i^2)
@@ -298,111 +248,37 @@ pairs = []
 
 # Define column names
 columns = ['tau delay', 'labjack reading']
-
-# parameters for loop:
-loopAmount=delay_number_of_points
-
-if(fig_mode==3):
-    
-# copy of time delay array
-# Generate non-integer delays
-    delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
-#print(delays)
-
-if(fig_mode==4):
-    
-# copy of time delay array
-# Generate non-integer delays
-    #delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
-    delays = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
-    delays = np.round(delays).astype(int)
-    print("T1_Decay_Synchronized.py: mw_pulse_lengths_ns=")
-    print(delays)
-#loop over and read the signal from the Labjack T7 and append the value to the intensity array
-
-
-
-if(fig_mode==5):
-    
-# copy of time delay array
-# Generate non-integer delays
-    #delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
-    delays = np.linspace(mw_T_delay_length_start_ns, mw_T_delay_length_stop_ns, mw_T_delay_length_number_of_points)
-    delays = np.round(delays).astype(int)
-    print("T1_Decay_Synchronized.py: mw_pulse_lengths_ns=")
-    print(delays)
-#loop over and read the signal from the Labjack T7 and append the value to the intensity array
-
-
-if(fig_mode==6): # same as fig 5, varies tdelay
-    
-# copy of time delay array
-# Generate non-integer delays
-    #delays = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)
-    delays = np.linspace(mw_T_delay_length_start_ns, mw_T_delay_length_stop_ns, mw_T_delay_length_number_of_points)
-    delays = np.round(delays).astype(int)
-    print("T1_Decay_Synchronized.py: mw_pulse_lengths_ns=")
-    print(delays)
-#loop over and read the signal from the Labjack T7 and append the value to the intensity array
-#--------------LOOP START----------------------------
-
-# Count down from 10
-#if(fig_mode==3):
-    #print("Countdown....")
-    #for i in range(10, 0, -1):
-        #print(i)
-        #time.sleep(1)
-    #print("BLASTOFF!")
-
-#print("starting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
-
-
-# if(fig_mode==3):
-#     ps.startNow()
-#     with nidaqmx.Task() as task:
-#         channel = task.ci_channels.add_ci_count_edges_chan(
-#             "Dev1/ctr0",
-#             edge=Edge.RISING,
-#             initial_count=0,
-#             count_direction=CountDirection.COUNT_UP,
-#         )
-#         channel.ci_count_edges_term = "/Dev1/PFI8"
-
-#         print("Start counting. Press Ctrl+C to stop.")
-    
-#         for tau in delays:
-#             try:
-#                 edge_counts = 0
-#                 task.start()
-#                 time.sleep(step_time)
-#                 edge_counts = task.read()
-#                 task.stop()
-#                 print(tau,edge_counts)
-#                 pairs.append((tau,edge_counts))
-            
-#             except KeyboardInterrupt:
-#                 pass
-#             finally:
-#                 task.stop()
-
-num_points=len(delays)
 i=0
-#if(fig_mode==4):
+if(fig_mode==3):
+    with nidaqmx.Task() as task:
+        channel = task.ci_channels.add_ci_count_edges_chan(
+            "Dev1/ctr0",
+             edge=Edge.RISING,
+             initial_count=0,
+             count_direction=CountDirection.COUNT_UP,
+         )
+        channel.ci_count_edges_term = "/Dev1/PFI8"
+        print("Start counting. Press Ctrl+C to stop.")
+        for sequence, tau in zip(sequences, tau_laser_variable):
+             try:
+                edge_counts = 0
+                ps.stream(sequence)
+                task.start()
+                time.sleep(rabi_and_hahn_delay_s)
+                edge_counts = task.read()
+                task.stop()
+                print(tau,edge_counts)
+                pairs.append((tau,edge_counts))
+                x=abs(edge_counts)
+                print(i,int(tau),f"{x:.3f}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
+                print(tau,abs(edge_counts))
+                i=i+1
+             except KeyboardInterrupt:
+                 pass
+             finally:
+                 task.stop()
+
 if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
-    # Get the current time
-    current_time = datetime.now()
-    print("Current time:", current_time.strftime("%Y-%m-%d %H:%M:%S"))
-    time_to_complete_seconds=(step_time+rabi_and_hahn_delay_s)*mw_pulse_length_number_of_points
-    # Convert total time to minutes and seconds
-    minutes, seconds = divmod(time_to_complete_seconds, 60)
-    print(f"Estimated time to complete: {int(minutes)} minutes and {int(seconds)} seconds")
-    completion_time = current_time + timedelta(seconds=time_to_complete_seconds)
-    print("Estimated completion time:", completion_time.strftime("%Y-%m-%d %H:%M:%S"))
-    print("Starting collecting")
-
-    print("Point, Tau(ns), result, time")
-
     with nidaqmx.Task() as task:
         channel = task.ci_channels.add_ci_count_edges_chan(
             "Dev1/ctr0",
@@ -411,16 +287,11 @@ if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
             count_direction=CountDirection.COUNT_UP,
         )
         channel.ci_count_edges_term = "/Dev1/PFI8"
-
         print("Start counting. Press Ctrl+C to stop.")
-
-
-        for sequence, tau in zip(sequences, tau_mw_varibale):
-
+        for sequence, tau in zip(sequences, tau_mw_variable):
             try:
                 edge_counts = 0
                 ps.stream(sequence)
-                ps.startNow()
                 task.start()
                 time.sleep(rabi_and_hahn_delay_s)
                 edge_counts = task.read()
@@ -437,9 +308,6 @@ if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
                 task.stop()
     
 #--------------------- DISPLAY DATA AND SAVE TO FILE-------------------------
-
-#print(pairs)  # Print the list of tuples
-
 
 # Open the file in 'w' mode with newline='' to prevent extra newline characters
 with open(plotname, 'w', newline='') as csvfile:
