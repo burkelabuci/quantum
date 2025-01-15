@@ -5,101 +5,8 @@
 # Sewani, Vikas K., Hyma H. Vallabhapurapu, Yang Yang, Hannes R. Firgau, Chris Adambukulam, 
 # Brett C. Johnson, Jarryd J. Pla, and Arne Laucht. 
 # "Coherent control of NV− centers in diamond in a quantum teaching lab." American Journal of Physics 88, no. 12 (2020): 1156-1169.
-
-# This program creates Ch0 and Ch1 output waveform of Pulseblaster model 8/2 as Fig 3 of reference
-# at IP address PB_IPADDRESS
-
 #----------------INSTRUCTIONS------------------------------------
-#To generate Fig 3 of teaching paper:
-
-#1. Set up optics to get ODMR to make sure everything is working right.
-#2. Set up pulse blaster and photocurrent to lock in. The scale of lock in may need to be adjusted for T1.
-#3. Run:
-#T1_Decay_Synchronized.py
-
-# This generates every single pulse and downloads it to the pulseblaser.
-# The delay gets larger every number_of_cycles, so you vary the delay.
-# But the sequence is one giant sequence precomputed.
-#The parameters need to be adjusted as needed:
-
-# fig_mode=3 for figure 3.
-# tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4.
-# number_of_cycles=33 # default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4
-# Since the reference rate is 33 Hz, the pulseblaster will create 33 cycles for each delay, giving one second to take the data.
-# If you want longer per delay point, increase 33 cycles. E.g. 330 Hz will give 10 seconds of time for each delay point.
-
-# Uncomment one of these three:
-#do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-#do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-#do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-# Keep the Rabi lines commented out
-
-# the no init creates a readout pulse with no initialization pulse, so should be independent of tdelay.
-# in the teaching paper the init and readout pulse are both 5 microseconds, but you can have different readout pulse width if you want
-#----------------INSTRUCTIONS------------------------------------
-#To generate Fig 4b,c,d of teaching paper:
-
-# This is just ODMR where the lockin output is measured as you step the frequency.
-# The program Chopped_ODMR_SRS_DS345.py can be used to do this sweep.
-# You just have to adjust the frequency range, step, and time per point.
-# To set the pulsing sequence up as in Fig 4a, you need to download the correct pulse sequence into the pulseblaster and set it to run indefinitely.
-# Do this with:
-# callpulseblasterhelperfunctions.py
-# That calls :
-# create_fig4_teachingpaper_pulse_sequence(tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,ps)
-# You have to input the parameters tau_ref_ns,tau_laser_ns,tau_mw_ns,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats
-# Note there is a function version in T1_Decay_Subroutines.py called
-# def chopped_odmr_srs_ds345(start_frequency=2670, stop_frequency=2690, step_size=1, step_time=1000, base_folder=r"C:\Users\BurkeLab\Desktop\072624"):
-# It does not plot, just saves the file.
-
-#----------------INSTRUCTIONS------------------------------------
-#To generate Fig 4e of teaching paper: (Rabi oscillations)
-
-#1. Set up optics to get ODMR to make sure everything is working right.
-#2. Set up pulse blaster and photocurrent to lock in. The scale of lock in may need to be adjusted for T1.
-#3. Run:
-#T1_Decay_Synchronized.py
-
-# This generates every single pulse and downloads it to the pulseblaser.
-# But for each delay, it downloads a new pulse sequence. (Sadly the memory is too small to download the pulses for all delays)
-#The parameters need to be adjusted as needed:
-
-# fig_mode=4 for figure 4.
-# tau_ref_ns=2.5e-3*1e9 # 15 ms fig 3, 2.5 ms fig 4.
-# number_of_cycles=200 # default 33 for fig 3 33 hz; sets how long each pulse pattern is for a given delay; 200 for Fig 4
-# Since the reference rate is 200 Hz, the pulseblaster will create 200 cycles for each delay, giving one second to take the data.
-# If you want longer per delay point, increase 200 cycles. E.g. 2000 Hz will give 10 seconds of time for each delay point.
-
-# Comment out :
-#do_it_all(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-#do_it_all_no_init(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-#do_it_all_different_init_and_readout_pulsewidth(channel_number_ref,channel_number_pulse,tau_ref_ns,tau_i_ns,tau_readout_ns,number_of_cycles,delay_start_s,delay_stop_s,delay_number_of_points,ps)
-# (The Rabi function tried to download one giant sequence but it was too big for the pulseblaster brain to handle)
-
-# Uncommment:
-# sequences=rabi_many_sequences(channel_number_ref,channel_number_laser_pulse,channel_number_mw_pulse,tau_ref_ns,tau_laser_ns,mw_pulse_length_start_ns,mw_pulse_length_stop_ns,mw_pulse_length_number_of_points,tau_padding_before_mw_ns,tau_padding_after_mw_ns,n_repeats,number_of_cycles,ps)
-# This generates a 1d array of sequences, each one for a different delay.
-
-
-
-#----------------INSTRUCTIONS------------------------------------
-#To generate Fig 5 of teaching paper: (Hahn echo)
-
-# configure parameters below that pertain to fig 5
-# fig_mode=5 for figure 5.
-# uncomment  sequences=Hahn_many_sequences(...
-# 
-#----------------INSTRUCTIONS------------------------------------
-#To generate Fig 6 of teaching paper: (CPMG )
-
-# configure parameters below that pertain to fig 6
-# fig_mode=6 for figure 6.
-# uncomment  sequences=CPMG_many_sequences(...
-# 
-
 #---------------------------------------------------------------
-
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -122,26 +29,30 @@ import nidaqmx
 from nidaqmx.constants import AcquisitionType, CountDirection, Edge
 
 plotname = create_folder_and_generate_filename_csv()# Generate unique filename with name mm/dd/yy (eg. 070324)
-
-
 #--------------------- PARAMETERS-------------------------
+#Figure configuration
+fig_mode=4 # 2 for pulsed ODMR, 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
+#Pulse Blaster channel definition
+channel_number_laser_pulse=1 # laser
+channel_number_mw_pulse=2 #MW
+channel_number_gate_pulse=4 #SPD gate
 
-# for both fig 3 and fig 4 and fig 5 and 6
-fig_mode=4 # 3 for figure 3 , 4 for figure 4, 5 for figure 5, 6 for figure 6
-channel_number_laser_pulse=1 # same thing as channel_number_pulse
-channel_number_mw_pulse=2
-channel_number_gate_pulse=4
+tau_laser_ns=5e-6*1e9 # laser pulse width
+count_delay_s=5 # Delay for count reading
+
+#Pulsed ODMR 
+start_frequency = 2800 #in MHz
+stop_frequency = 2950 #in MHz
+step_size = int(1) # specing between each frequency point in MHz
+step_time = int(500) #in milliseconds
+step_time_s = float(step_time/1000) #in seconds
+freq_num= [i * 1e3 for i in range(start_frequency, stop_frequency, step_size)]
 
 # Fig 3 only
 # Fig 3 will vary delay between laser init and laser readout pulse between delay_start_s and delay_stop_s and measure the LIA at each point.
 delay_start_s=0.5e-3
 delay_stop_s=5e-3
 delay_number_of_points=50
-
-
-# for Fig 4, 5, 6
-tau_laser_ns=5e-6*1e9 # laser pulse width, fig 4, 5
-rabi_and_hahn_delay_s=5 # delay after setting new microwave pulse time to reading LIA output; can be 2 seconds for fig 4
 
 # Fig 4 only:
 # Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
@@ -161,23 +72,12 @@ mw_T_delay_length_stop_ns=500e-9*1e9
 mw_T_delay_length_number_of_points=20
 mw_T_delay_delay_s=2 # delay after setting new microwave pulse time to reading LIA output
 
-# Fig 6 only:
-N_CPMG=4 # number of CPMG refocusing pulses
-
 #--------------------- INITIALIZE PULSEBLASTER-------------------------
 PB_IPADDRESS= '169.254.8.2'
 
 ps = PulseStreamer(PB_IPADDRESS)
 print(f"PulseStreamer initialized: {ps}")
-
-
-#ps.setTrigger(TriggerStart.SOFTWARE)
-
 #--------------------- DOWNLOADED PULSES STREAM TO PULSESTREAMER-------------------------
-
-
-
-
 print("T1_Decay_Synchronized.py: calling function with these parameters:")
 print(f"T1_Decay_Synchronized.py: channel_number_pulse: {channel_number_laser_pulse}")
 print(f"T1_Decay_Synchronized.py: tau_i_ns: {tau_laser_ns}")
@@ -192,9 +92,10 @@ print(f"T1_Decay_Synchronized.py: (fig 4 only) mw_pulse_length_number_of_points:
 tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
 
 #T1 measurement
-tau_delay_lengths_ns = np.linspace(delay_start_s, delay_stop_s,delay_number_of_points)*1e9
+tau_delay_lengths_ns = np.linspace(delay_start_s, delay_stop_s, delay_number_of_points)*1e9
 tau_delay_lengths_ns = np.round(tau_delay_lengths_ns).astype(int)
 print(tau_delay_lengths_ns)
+
 #Rabi Oscillations
 mw_pulse_lengths_ns = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
 mw_pulse_lengths_ns = np.round(mw_pulse_lengths_ns).astype(int)
@@ -204,6 +105,28 @@ print(mw_pulse_lengths_ns)
 sequences=[]
 tau_mw_variable=[]
 tau_laser_variable=[]
+
+if(fig_mode==2):
+    #Microwave VCO initialization
+    synth = SynthHD("COM3")
+    print("\t \t Set Parameters \n \n")
+    synth.write("sweep_freq_low", start_frequency)
+    print("Starting sweeping")
+    synth.write("sweep_freq_high",stop_frequency)
+    print("Frequency high set")
+    synth.write("sweep_freq_step",step_size)
+    print("Frequency step set")
+    synth.write("sweep_time_step", step_time)
+    print("Frequency time set")
+    print(f"Unique filename: {step_time_s}")
+    pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_ns_rounded, 0)]
+    pulse_patt_mw = [(tau_laser_ns_rounded, 0),(tau_laser_ns_rounded, 1), (tau_laser_ns_rounded, 0), (tau_laser_ns_rounded, 1)]
+    pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_ns_rounded, 0)]
+    seq = ps.createSequence()
+    seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
+    seq.setDigital(channel_number_mw_pulse, pulse_patt_mw)
+    seq.setDigital(channel_number_gate_pulse, pulse_patt_SPD_gate)
+    ps.stream(seq)
 
 if(fig_mode==3):
     for tau_delay_length_ns in tau_delay_lengths_ns:
@@ -238,18 +161,52 @@ if(fig_mode==4):
 # Initialize the data array
 # Initialize an empty list to store the pairs (i, i^2)
 pairs = []
-
-
-# Define column names
-columns = ['tau delay', 'labjack reading']
 i=0
+
+if(fig_mode==2):
+    columns = ['frequencies', 'SPD count']
+    with nidaqmx.Task() as task:
+    # Create a counter channel to count rising edges
+        channel = task.ci_channels.add_ci_count_edges_chan(
+            "Dev1/ctr0",
+            edge=Edge.RISING,
+            initial_count=0,
+            count_direction=CountDirection.COUNT_UP,
+        )
+        channel.ci_count_edges_term = "/Dev1/PFI8"
+        print("Continuously pollingFig2. Press Ctrl+C to stop.")
+        try:
+            synth.write("sweep_single",True)
+            while True:
+                edge_counts = 0
+                current_frequency = synth.read("frequency") 
+                task.start()
+                time.sleep(step_time_s)
+                edge_counts = task.read()
+                task.stop()
+                print(current_frequency,edge_counts)
+                pairs.append((current_frequency*1e3,edge_counts))
+                x=abs(edge_counts)
+                print(i,int(current_frequency*1e3),f"{x:.3f}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
+                print(current_frequency*1e3,abs(edge_counts))
+                i=i+1
+                if current_frequency >=freq_num[-1]:
+                    break
+        except KeyboardInterrupt:
+            pass
+        finally:
+            task.stop()
+            print(f"\nAcquired {edge_counts:n} total counts.")
+
+
 if(fig_mode==3):
+    columns = ['tau delay', 'SPD count']
     with nidaqmx.Task() as task:
         channel = task.ci_channels.add_ci_count_edges_chan(
             "Dev1/ctr0",
-             edge=Edge.RISING,
-             initial_count=0,
-             count_direction=CountDirection.COUNT_UP,
+            edge=Edge.RISING,
+            initial_count=0,
+            count_direction=CountDirection.COUNT_UP,
          )
         channel.ci_count_edges_term = "/Dev1/PFI8"
         print("Start counting Fig3. Press Ctrl+C to stop.")
@@ -258,7 +215,7 @@ if(fig_mode==3):
                 edge_counts = 0
                 ps.stream(sequence)
                 task.start()
-                time.sleep(rabi_and_hahn_delay_s)
+                time.sleep(count_delay_s)
                 edge_counts = task.read()
                 task.stop()
                 print(tau,edge_counts)
@@ -273,6 +230,7 @@ if(fig_mode==3):
                  task.stop()
 
 if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
+    columns = ['tau delay', 'SPD count']
     with nidaqmx.Task() as task:
         channel = task.ci_channels.add_ci_count_edges_chan(
             "Dev1/ctr0",
@@ -287,7 +245,7 @@ if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
                 edge_counts = 0
                 ps.stream(sequence)
                 task.start()
-                time.sleep(rabi_and_hahn_delay_s)
+                time.sleep(count_delay_s)
                 edge_counts = task.read()
                 task.stop()
                 print(tau,edge_counts)
@@ -325,8 +283,8 @@ print(f'Lockin parameters have been saved to {plotname}')
 
 # Plotting
 plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
-plt.scatter(df['tau delay'], df['labjack reading'], color='blue', marker='o', label='Data Points')
-plt.plot(df['tau delay'], df['labjack reading'], color='blue', label='Data Points')
+plt.scatter(df['tau delay'], df['SPD count'], color='blue', marker='o', label='Data Points')
+plt.plot(df['tau delay'], df['SPD count'], color='blue', label='Data Points')
 plt.title('SPD count  vs Tau Delay')
 plt.xlabel('Tau Delay')
 plt.ylabel('SPD count')
