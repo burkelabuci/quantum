@@ -133,27 +133,19 @@ channel_number_mw_pulse=2
 channel_number_gate_pulse=4
 
 # Fig 3 only
-tau_i_ns=5e-6*1e9 # laser initialization pulse width
-#tau_readout_ns=tau_i_ns # laser readout pulse width
-tau_readout_ns=5e-6*1e9 # laser readout pulse width
 # Fig 3 will vary delay between laser init and laser readout pulse between delay_start_s and delay_stop_s and measure the LIA at each point.
-delay_start_s=0.1e-3
+delay_start_s=0.5e-3
 delay_stop_s=5e-3
 delay_number_of_points=50
 
 
 # for Fig 4, 5, 6
 tau_laser_ns=5e-6*1e9 # laser pulse width, fig 4, 5
-n_repeats=200 # number of times pattern repeated within a cycle; suggest 200 fig 4, 100 fig 5
-rabi_and_hahn_delay_s=2 # delay after setting new microwave pulse time to reading LIA output; can be 2 seconds for fig 4
+rabi_and_hahn_delay_s=5 # delay after setting new microwave pulse time to reading LIA output; can be 2 seconds for fig 4
 
 # Fig 4 only:
-#tau_padding_ns=1e-6*1e9 # not used for now
-#tau_padding_before_mw_ns=1000e-9*1e9 # time between end of laser pulse and start of mw pulse (fig 4)
-#tau_padding_after_mw_ns=1000e-9*1e9 # time between end of mw pulse and start of laser pulse (fig 4)
-#tau_mw_ns=5e-6*1e9 # not used
 # Fig 4 will vary mw pulse length from mw_pulse_length_start_ns to mw_pulse_length_stop_ns and measure LIA at each point
-mw_pulse_length_start_ns=20
+mw_pulse_length_start_ns=10
 mw_pulse_length_stop_ns=3000
 mw_pulse_length_number_of_points=50
 
@@ -188,8 +180,7 @@ print(f"PulseStreamer initialized: {ps}")
 
 print("T1_Decay_Synchronized.py: calling function with these parameters:")
 print(f"T1_Decay_Synchronized.py: channel_number_pulse: {channel_number_laser_pulse}")
-print(f"T1_Decay_Synchronized.py: tau_i_ns: {tau_i_ns}")
-print(f"T1_Decay_Synchronized.py: tau_readout_ns: {tau_readout_ns}")
+print(f"T1_Decay_Synchronized.py: tau_i_ns: {tau_laser_ns}")
 print(f"T1_Decay_Synchronized.py: (fig 3 only) delay_start_s: {delay_start_s}")
 print(f"T1_Decay_Synchronized.py: (fig 3 only) delay_stop_s: {delay_stop_s}")
 print(f"T1_Decay_Synchronized.py: (fig 3 only) delay_number_of_points: {delay_number_of_points}")
@@ -203,7 +194,7 @@ tau_laser_ns_rounded=round_to_nearest_8ns(tau_laser_ns)
 #T1 measurement
 tau_delay_lengths_ns = np.linspace(delay_start_s, delay_stop_s,delay_number_of_points)*1e9
 tau_delay_lengths_ns = np.round(tau_delay_lengths_ns).astype(int)
-
+print(tau_delay_lengths_ns)
 #Rabi Oscillations
 mw_pulse_lengths_ns = np.linspace(mw_pulse_length_start_ns, mw_pulse_length_stop_ns, mw_pulse_length_number_of_points)
 mw_pulse_lengths_ns = np.round(mw_pulse_lengths_ns).astype(int)
@@ -218,9 +209,11 @@ if(fig_mode==3):
     for tau_delay_length_ns in tau_delay_lengths_ns:
         tau_delay_length_ns_rounded=round_to_nearest_8ns(tau_delay_length_ns)
         pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_delay_length_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_delay_length_ns_rounded, 0)]
+        pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_delay_length_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_delay_length_ns_rounded, 0)]
         print(pulse_patt_laser)
         seq=ps.createSequence()
         seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
+        seq.setDigital(channel_number_gate_pulse, pulse_patt_SPD_gate)
         sequences.append(seq)
         tau_laser_variable.append(tau_delay_length_ns_rounded)
     
@@ -232,7 +225,8 @@ if(fig_mode==4):
         tau_laser_off_ns_rounded=tau_padding_before_mw_ns_rounded+mw_pulse_length_ns_rounded+tau_padding_after_mw_ns_rounded  
         pulse_patt_mw = [(tau_laser_ns_rounded, 0),(tau_padding_before_mw_ns_rounded, 0), (mw_pulse_length_ns_rounded, 1), (tau_padding_after_mw_ns_rounded, 0), (tau_laser_ns_rounded, 0), (tau_laser_off_ns_rounded, 0)]
         pulse_patt_laser = [(tau_laser_ns_rounded, 1),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
-        pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+        #pulse_patt_SPD_gate = [(tau_laser_ns_rounded, 0),(tau_laser_off_ns_rounded, 0), (tau_laser_ns_rounded, 1), (tau_laser_off_ns_rounded, 0)]
+        pulse_patt_SPD_gate=pulse_patt_laser
         print(pulse_patt_mw)
         seq=ps.createSequence()
         seq.setDigital(channel_number_laser_pulse, pulse_patt_laser)
@@ -258,7 +252,7 @@ if(fig_mode==3):
              count_direction=CountDirection.COUNT_UP,
          )
         channel.ci_count_edges_term = "/Dev1/PFI8"
-        print("Start counting. Press Ctrl+C to stop.")
+        print("Start counting Fig3. Press Ctrl+C to stop.")
         for sequence, tau in zip(sequences, tau_laser_variable):
              try:
                 edge_counts = 0
@@ -287,7 +281,7 @@ if fig_mode == 4 or fig_mode == 5 or fig_mode == 6: # both loops are same code
             count_direction=CountDirection.COUNT_UP,
         )
         channel.ci_count_edges_term = "/Dev1/PFI8"
-        print("Start counting. Press Ctrl+C to stop.")
+        print("Start counting Fig4. Press Ctrl+C to stop.")
         for sequence, tau in zip(sequences, tau_mw_variable):
             try:
                 edge_counts = 0
@@ -332,9 +326,10 @@ print(f'Lockin parameters have been saved to {plotname}')
 # Plotting
 plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
 plt.scatter(df['tau delay'], df['labjack reading'], color='blue', marker='o', label='Data Points')
-plt.title('Labjack Reading  vs Tau Delay')
+plt.plot(df['tau delay'], df['labjack reading'], color='blue', label='Data Points')
+plt.title('SPD count  vs Tau Delay')
 plt.xlabel('Tau Delay')
-plt.ylabel('Labjack Reading')
+plt.ylabel('SPD count')
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
