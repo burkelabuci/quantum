@@ -391,7 +391,7 @@ def create_fig3_teachingpaper_pulse_sequence_repeated_SPD(channel_number_ref,cha
     seq.setDigital(channel_number_pulse, pulse_patt_decay)
     
     #*********** THEN Gating Pulses
-    gating_patt=create_pattern_array_gating_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
+    gating_patt=create_pattern_array_gating_rounded_to_8_ns_SPD(tau_ref_ns, tau_i_ns, tau_delay_ns, number_of_cycles)
     
     seq.setDigital(channel_number_gating_pulses,gating_patt)
 
@@ -1177,6 +1177,24 @@ def create_pattern_array_rounded_to_8_ns_SPD(tau_ref_ns, tau_i_ns, tau_delay_ns,
 
 
 def create_pattern_array_gating_rounded_to_8_ns(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
+    #round_to_nearest_8ns(value)
+    tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
+    tau_i_ns_rounded=round_to_nearest_8ns(tau_i_ns)
+    tau_delay_ns_rounded=round_to_nearest_8ns(tau_delay_ns)
+    
+    pattern = [
+        (tau_i_ns_rounded, 0), 
+        ((tau_ref_ns_rounded - tau_i_ns_rounded), 0), 
+        (tau_i_ns_rounded, 0), 
+        (tau_delay_ns_rounded, 0), 
+        (tau_i_ns_rounded, 1), 
+        ((tau_ref_ns_rounded - 2 * tau_i_ns_rounded - tau_delay_ns_rounded), 0)
+    ]
+    
+    pattern_array = pattern * n
+    return pattern_array
+
+def create_pattern_array_gating_rounded_to_8_ns_SPD(tau_ref_ns, tau_i_ns, tau_delay_ns, n):
     #round_to_nearest_8ns(value)
     tau_ref_ns_rounded=round_to_nearest_8ns(tau_ref_ns)
     tau_i_ns_rounded=round_to_nearest_8ns(tau_i_ns)
